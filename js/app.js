@@ -1,4 +1,4 @@
-﻿// ===== VARIÃVEIS GLOBAIS =====
+// ===== VARIÁVEIS GLOBAIS =====
 const mapContainer = document.getElementById('map-container');
 const mapWrapper = document.getElementById('map-wrapper');
 const mapSvg = document.getElementById('map-svg');
@@ -12,7 +12,26 @@ let isDragging = false;
 let startX, startY;
 let lastTranslateX, lastTranslateY;
 let svgDoc = null;
+let currentSelectedKey = null; // Chave do item selecionado (city:/marker:/poi:) p/ toggle
 let mapClickActive = false; // Flag global para modo de selecao de ponto no mapa
+
+// Retorna o retangulo (path "d") que cobre TODO o SVG atual, lido do viewBox.
+// Cada mapa (principal / sub-mapas de cidade) tem dimensoes diferentes, entao
+// nunca usamos valores fixos aqui.
+function overlayBaseRect() {
+    let w = 8192, h = 6144; // fallback (mapa principal)
+    try {
+        const svgEl = svgDoc && svgDoc.querySelector('svg');
+        const vb = svgEl && svgEl.viewBox && svgEl.viewBox.baseVal;
+        if (vb && vb.width && vb.height) {
+            // Inclui a origem do viewBox (vb.x/vb.y) para cobrir mapas que nao
+            // comecam em 0,0.
+            return 'M' + vb.x + ',' + vb.y + ' H' + (vb.x + vb.width) +
+                   ' V' + (vb.y + vb.height) + ' H' + vb.x + ' Z';
+        }
+    } catch (e) { /* usar fallback */ }
+    return 'M0,0 H' + w + ' V' + h + ' H0 Z';
+}
 
 // ===== ROTEAMENTO POR URL - MAPA PRINCIPAL OU CIDADE =====
 const urlParams = new URLSearchParams(window.location.search);
@@ -46,7 +65,7 @@ function initSvg() {
     svgDoc = mapSvg.contentDocument;
     if (!svgDoc) return;
 
-    // Configurar cada cidade como clicÃ¡vel
+    // Configurar cada cidade como clicável
     activeCityIds.forEach(id => {
         const group = svgDoc.getElementById(id);
         if (group) {
@@ -72,6 +91,16 @@ function initSvg() {
     // Injetar estilos no SVG
     const style = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'style');
     style.textContent = `
+        /* Manchas de sangue dispersas (marcador permanente e discreto) */
+        .poi-permanent-marker {
+            transition: opacity 0.3s ease;
+            mix-blend-mode: multiply;
+        }
+        /* Esconder as manchas quando o POI esta selecionado/animando */
+        .active > .poi-permanent-marker,
+        .city-highlighted > .poi-permanent-marker {
+            opacity: 0 !important;
+        }
         .city-dimmed {
             opacity: 0.3;
             transition: opacity 0.4s ease;
@@ -138,7 +167,7 @@ function initSvg() {
     overlay.setAttribute('fill', 'rgba(0, 0, 0, 0.55)');
     overlay.setAttribute('fill-rule', 'evenodd');
     overlay.setAttribute('pointer-events', 'none');
-    overlay.setAttribute('d', 'M0,0 H8192 V6144 H0 Z');
+    overlay.setAttribute('d', overlayBaseRect());
     overlay.style.opacity = '0';
     overlay.style.transition = 'opacity 0.4s ease';
     if (poisGroup) {
@@ -325,10 +354,103 @@ function initSvg() {
         return bloodGroup;
     }
 
+    // ===== MANCHAS DE SANGUE DISPERSAS (marcador permanente e discreto) =====
+    function addScatteredBloodStains(svgDoc, pathEl, groupEl, poiId) {
+        const SVGNS = 'http://www.w3.org/2000/svg';
+        let bbox;
+        try { bbox = pathEl.getBBox(); } catch (e) { return; }
+        if (!bbox || bbox.width === 0 || bbox.height === 0) return;
+
+        // Recorte com o formato do POI, para as manchas nao vazarem para fora.
+        const svgEl = svgDoc.querySelector('svg');
+        let defs = svgEl.querySelector('defs');
+        if (!defs) { defs = svgDoc.createElementNS(SVGNS, 'defs'); svgEl.insertBefore(defs, svgEl.firstChild); }
+
+        const clipId = 'stain-clip-' + poiId;
+        if (!svgDoc.getElementById(clipId)) {
+            const clip = svgDoc.createElementNS(SVGNS, 'clipPath');
+            clip.setAttribute('id', clipId);
+            clip.setAttribute('clipPathUnits', 'userSpaceOnUse');
+            const clipShape = pathEl.cloneNode(false);
+            clipShape.removeAttribute('id');
+            clipShape.removeAttribute('style');
+            clipShape.removeAttribute('class');
+            clip.appendChild(clipShape);
+            defs.appendChild(clip);
+        }
+
+        const stainGroup = svgDoc.createElementNS(SVGNS, 'g');
+        stainGroup.setAttribute('class', 'poi-permanent-marker');
+        stainGroup.setAttribute('clip-path', 'url(#' + clipId + ')');
+        stainGroup.style.pointerEvents = 'none';
+
+        // Gerador pseudo-aleatorio deterministico por POI (manchas estaveis).
+        let seed = 0;
+        for (let i = 0; i < poiId.length; i++) seed = (seed * 31 + poiId.charCodeAt(i)) >>> 0;
+        const rand = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+
+        // Tamanho de referencia (o menor lado do POI define a escala das manchas)
+        const ref = Math.min(bbox.width, bbox.height);
+        const nStains = 5 + Math.floor(rand() * 3); // 5 a 7 manchas
+
+        for (let i = 0; i < nStains; i++) {
+            // Posicao dentro da bbox (o clip garante que fique dentro do path)
+            const cx = bbox.x + (0.12 + rand() * 0.76) * bbox.width;
+            const cy = bbox.y + (0.12 + rand() * 0.76) * bbox.height;
+            // Raio variado (manchas um pouco maiores para serem perceptiveis)
+            const r = ref * (0.09 + rand() * 0.15);
+
+            // Blob organico irregular (nao um circulo perfeito)
+            const pts = 7 + Math.floor(rand() * 3);
+            let d = '';
+            for (let k = 0; k < pts; k++) {
+                const ang = (k / pts) * Math.PI * 2;
+                const rr = r * (0.6 + rand() * 0.6);
+                const px = cx + Math.cos(ang) * rr;
+                const py = cy + Math.sin(ang) * rr * 0.85;
+                d += (k === 0 ? 'M' : 'L') + px.toFixed(1) + ',' + py.toFixed(1) + ' ';
+            }
+            d += 'Z';
+
+            const blob = svgDoc.createElementNS(SVGNS, 'path');
+            blob.setAttribute('d', d);
+            // Vermelho-sangue escuro e translucido, perceptivel mas nao gritante
+            const alpha = (0.45 + rand() * 0.25).toFixed(2);
+            const rc = 120 + Math.floor(rand() * 45); // 120-165
+            blob.setAttribute('fill', 'rgba(' + rc + ',18,18,' + alpha + ')');
+            blob.style.pointerEvents = 'none';
+            stainGroup.appendChild(blob);
+
+            // Alguns respingos minusculos ao redor
+            if (rand() > 0.5) {
+                const drops = 1 + Math.floor(rand() * 2);
+                for (let dI = 0; dI < drops; dI++) {
+                    const dr = r * (0.12 + rand() * 0.18);
+                    const dx = cx + (rand() - 0.5) * r * 3;
+                    const dy = cy + (rand() - 0.5) * r * 3;
+                    const dot = svgDoc.createElementNS(SVGNS, 'circle');
+                    dot.setAttribute('cx', dx.toFixed(1));
+                    dot.setAttribute('cy', dy.toFixed(1));
+                    dot.setAttribute('r', dr.toFixed(1));
+                    dot.setAttribute('fill', 'rgba(120,14,14,' + (0.32 + rand() * 0.22).toFixed(2) + ')');
+                    dot.style.pointerEvents = 'none';
+                    stainGroup.appendChild(dot);
+                }
+            }
+        }
+
+        // Inserir como primeiro filho para ficar por baixo do contorno animado.
+        groupEl.insertBefore(stainGroup, groupEl.firstChild);
+    }
+
     activeCityIds.forEach(id => {
         const group = svgDoc.getElementById(id);
         if (!group) return;
-        const pathEl = group.querySelector('path');
+        // Path real do POI: se ja houver manchas (.poi-permanent-marker) de uma
+        // execucao anterior, garantir que pegamos o contorno e nao um blob.
+        const pathEl = group.querySelector('.blood-path')
+            || group.querySelector(':scope > path')
+            || group.querySelector('path');
         if (!pathEl) return;
 
         // Setup path for blood animation
@@ -339,6 +461,13 @@ function initSvg() {
         pathEl.style.strokeDashoffset = pathLength;
         pathEl.style.fill = 'rgba(0,0,0,0)';
         pathEl.style.stroke = 'rgba(100,5,5,0)';
+
+        // Marcador PERMANENTE: pequenas manchas de sangue DISPERSAS dentro do
+        // path do POI. Ficam recortadas pela forma do local (clip-path), entao
+        // aparecem so por cima do desenho do POI - discreto, sem overlay solido.
+        if (!group.querySelector('.poi-permanent-marker')) {
+            addScatteredBloodStains(svgDoc, pathEl, group, id);
+        }
 
         // Create blood effects (drips + splatters)
         const bloodGroup = createBloodEffects(svgDoc, pathEl, group);
@@ -397,23 +526,31 @@ function initSvg() {
     fitMapToScreen();
 }
 
-// Registrar o load event E verificar se jÃ¡ carregou
+// Registrar o load event E verificar se já carregou
 mapSvg.addEventListener('load', initSvg);
-// Se o SVG jÃ¡ estava em cache e carregou antes do script
+// Se o SVG já estava em cache e carregou antes do script
 if (mapSvg.contentDocument && mapSvg.contentDocument.querySelector('svg')) {
     initSvg();
 }
 
-// ===== SELEÃ‡ÃƒO DE CIDADES =====
+// ===== SELEÇÃO DE CIDADES =====
 function selectCity(id) {
     if (mapClickActive) return; // Nao interagir com cidades durante selecao de ponto
+
+    // Toggle: clicar de novo no mesmo local ja selecionado fecha e reseta o zoom
+    if (currentSelectedKey === 'city:' + id && infoPanel.classList.contains('open')) {
+        deselectAll();
+        return;
+    }
+    currentSelectedKey = 'city:' + id;
+
     const svgEl = svgDoc.querySelector('svg');
     const overlay = svgDoc.getElementById('dim-overlay');
 
     // Mostrar overlay escuro
     overlay.style.opacity = '1';
 
-    // Desselecionar todas as cidades â€” mover de volta para antes do overlay
+    // Desselecionar todas as cidades — mover de volta para antes do overlay
     activeCityIds.forEach(cid => {
         const g = svgDoc.getElementById(cid);
         if (g) {
@@ -454,8 +591,12 @@ function selectCity(id) {
     if (group) {
         group.classList.add('active', 'city-highlighted');
 
-        // Criar buraco no overlay para mostrar o interior do POI
-        const poiPath = group.querySelector('path');
+        // Criar buraco no overlay para mostrar o interior do POI.
+        // IMPORTANTE: usar o contorno real do POI (.blood-path), nao um dos
+        // paths das manchas de sangue (.poi-permanent-marker) que sao filhos.
+        const poiPath = group.querySelector('.blood-path')
+            || group.querySelector(':scope > path')
+            || group.querySelector('path:not(.poi-permanent-marker *)');
         if (poiPath) {
             // Obter transform acumulado entre o path e o SVG root
             // Percorrer parents até o SVG para coletar translações
@@ -494,19 +635,120 @@ function selectCity(id) {
                     cutoutD += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
                 }
                 cutoutD += 'Z';
-                overlay.setAttribute('d', 'M0,0 H8192 V6144 H0 Z ' + cutoutD);
+                overlay.setAttribute('d', overlayBaseRect() + ' ' + cutoutD);
             } else {
                 // Path sem transform - usar d direto
                 const poiD = poiPath.getAttribute('d');
-                overlay.setAttribute('d', 'M0,0 H8192 V6144 H0 Z ' + poiD);
+                overlay.setAttribute('d', overlayBaseRect() + ' ' + poiD);
             }
         } else {
-            overlay.setAttribute('d', 'M0,0 H8192 V6144 H0 Z');
+            overlay.setAttribute('d', overlayBaseRect());
         }
     }
 
-    // Mostrar informaÃ§Ãµes
+    // Mostrar informações
     showCityInfo(id);
+
+    // Dar zoom e centralizar o ponto de interesse selecionado
+    if (group) zoomToElement(group);
+}
+
+// ===== ZOOM / CENTRALIZAR EM UM ELEMENTO DO MAPA =====
+// Retorna a coordenada "local do wrapper" (antes de translate/scale) do centro
+// da forma principal de um POI. Independe do zoom atual e da animacao.
+//
+// getScreenCTM() e getBBox(), quando chamados DENTRO do <object> SVG, operam no
+// espaco de viewport do proprio objeto, que NAO e afetado pelo transform CSS
+// da pagina pai e coincide com o espaco "local" do #map-wrapper. Verificado
+// empiricamente: os valores sao invariantes ao zoom aplicado ao wrapper.
+function elementLocalCenter(targetEl) {
+    if (!targetEl || !svgDoc) return null;
+    const svgEl = svgDoc.querySelector('svg');
+    if (!svgEl) return null;
+
+    // IMPORTANTE: o grupo do POI pode conter filhos gigantes (gotas de sangue,
+    // splatters, cutouts) que inflariam o getBBox e jogariam o centro para
+    // fora. Usamos apenas o(s) path(s) principal(is) da forma do POI, ignorando
+    // elementos de efeito (blood-drips / blood-path / splatters).
+    let geomEl = targetEl;
+    try {
+        const paths = targetEl.querySelectorAll('path, circle, rect, polygon, image, ellipse');
+        let best = null, bestArea = 0;
+        paths.forEach(p => {
+            const cls = (p.getAttribute('class') || '');
+            // Ignorar SOMENTE elementos de efeito (gotas/splatters).
+            // Atencao: o path principal do POI recebe a classe "blood-path"
+            // (contorno para animacao) e NAO deve ser ignorado.
+            if (/drip-line|blood-splatter|blood-drips/i.test(cls)) return;
+            if (p.closest && p.closest('.blood-drips')) return;
+            let b;
+            try { b = p.getBBox(); } catch (e) { return; }
+            if (!b) return;
+            const area = b.width * b.height;
+            if (area > bestArea) { bestArea = area; best = p; }
+        });
+        if (best) geomEl = best;
+    } catch (e) { /* fallback para o proprio elemento */ }
+
+    let bbox;
+    try { bbox = geomEl.getBBox(); } catch (e) { return null; }
+    if (!bbox || (bbox.width === 0 && bbox.height === 0)) return null;
+
+    const cx = bbox.x + bbox.width / 2;
+    const cy = bbox.y + bbox.height / 2;
+
+    // getScreenCTM() (dentro do <object>) mapeia coords locais do elemento para
+    // pixels do viewport do objeto, que coincide com o espaco "local" do wrapper
+    // (nao e afetado pelo transform CSS da pagina). Ja aplica viewBox/aspecto.
+    let ctm;
+    try { ctm = geomEl.getScreenCTM(); } catch (e) { return null; }
+    if (!ctm) return null;
+
+    const pt = svgEl.createSVGPoint();
+    pt.x = cx; pt.y = cy;
+    const sp = pt.matrixTransform(ctm);
+    return { x: sp.x, y: sp.y };
+}
+
+function zoomToElement(targetEl, targetScale) {
+    if (!targetEl || !mapWrapper) return;
+
+    const local = elementLocalCenter(targetEl);
+    if (!local) return;
+
+    // Escala desejada: valor fixo para o "destaque" do POI
+    const desiredScale = targetScale || 2.6;
+
+    // Alvo: centro da area visivel. O painel de info ocupa a direita.
+    const panelWidth = (infoPanel && infoPanel.classList.contains('open')) ? 380 : 0;
+    const screenTargetX = (window.innerWidth - panelWidth) / 2;
+    const screenTargetY = window.innerHeight / 2;
+
+    // screen = translate + local * scale  =>  translate = target - local*scale
+    translateX = screenTargetX - local.x * desiredScale;
+    translateY = screenTargetY - local.y * desiredScale;
+    scale = desiredScale;
+
+    animateMapTransform();
+}
+
+// Voltar o mapa ao estado inicial (sem zoom), com animacao
+function resetMapZoom() {
+    scale = 1;
+    translateX = 0;
+    translateY = 0;
+    animateMapTransform();
+}
+
+// Aplica o transform com uma transicao suave (usada por zoom e reset)
+function animateMapTransform() {
+    if (!mapWrapper) return;
+    mapWrapper.classList.add('zooming');
+    updateTransform();
+    clearTimeout(animateMapTransform._t);
+    animateMapTransform._t = setTimeout(() => {
+        mapWrapper.classList.remove('zooming');
+    }, 650);
 }
 
 function deselectAll() {
@@ -515,7 +757,7 @@ function deselectAll() {
         const overlay = svgDoc.getElementById('dim-overlay');
         if (overlay) {
             overlay.style.opacity = '0';
-            overlay.setAttribute('d', 'M0,0 H8192 V6144 H0 Z');
+            overlay.setAttribute('d', overlayBaseRect());
         }
 
         activeCityIds.forEach(id => {
@@ -554,6 +796,10 @@ function deselectAll() {
         }
     }
     infoPanel.classList.remove('open');
+    currentSelectedKey = null;
+
+    // Voltar o mapa ao estado inicial (sem zoom)
+    if (typeof resetMapZoom === 'function') resetMapZoom();
 }
 
 function showCityInfo(id) {
@@ -568,7 +814,7 @@ function showCityInfo(id) {
     if (city.image) html = buildPortraitHtml(city, 'cities["' + id + '"]', 'cities', id);
     html += `
         <div class="info-section">
-            <h3>DescriÃ§Ã£o</h3>
+            <h3>Descrição</h3>
             <p>${linkifyLocations(city.description)}</p>
         </div>
         <div class="info-section">
@@ -664,13 +910,21 @@ function renderMapMarkers() {
 function showMarkerInfo(marker) {
     if (!svgDoc) return;
     if (mapClickActive) return; // Nao interagir com markers durante selecao de ponto
+
+    // Toggle: clicar de novo no mesmo marcador fecha e reseta o zoom
+    if (currentSelectedKey === 'marker:' + marker.id && infoPanel.classList.contains('open')) {
+        deselectAll();
+        return;
+    }
+    currentSelectedKey = 'marker:' + marker.id;
+
     const svgEl = svgDoc.querySelector('svg');
     const overlay = svgDoc.getElementById('dim-overlay');
 
     // Mostrar overlay escuro
     if (overlay) overlay.style.opacity = '1';
 
-    // Desselecionar cidades â€” mover para antes do overlay
+    // Desselecionar cidades — mover para antes do overlay
     activeCityIds.forEach(cid => {
         const g = svgDoc.getElementById(cid);
         if (g) {
@@ -680,7 +934,7 @@ function showMarkerInfo(marker) {
         }
     });
 
-    // Desselecionar todos os markers â€” mover para antes do overlay
+    // Desselecionar todos os markers — mover para antes do overlay
     mapMarkers.forEach(m => {
         const g = svgDoc.getElementById(m.id);
         if (g) {
@@ -690,7 +944,7 @@ function showMarkerInfo(marker) {
         }
     });
 
-    // Destacar o marker clicado â€” mover para cima do overlay
+    // Destacar o marker clicado — mover para cima do overlay
     const group = svgDoc.getElementById(marker.id);
     if (group) {
         group.classList.add('active');
@@ -715,6 +969,9 @@ function showMarkerInfo(marker) {
 
     document.getElementById('city-info').innerHTML = html;
     infoPanel.classList.add('open');
+
+    // Dar zoom e centralizar no marcador
+    if (group) zoomToElement(group);
 }
 
 // Fechar painel
@@ -858,7 +1115,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Esconder instruÃ§Ã£o apÃ³s 5 segundos
+// Esconder instrução após 5 segundos
 setTimeout(() => {
     instructions.style.opacity = '0';
     setTimeout(() => instructions.remove(), 2000);
@@ -907,7 +1164,7 @@ function showCharacterInfo(index) {
 
     html += `
         <div class="info-section">
-            <h3>DescriÃ§Ã£o</h3>
+            <h3>Descrição</h3>
             <p>${linkifyLocations(char.description)}</p>
         </div>
         <div class="info-section">
@@ -990,7 +1247,7 @@ function buildPortraitHtml(entity, entityRef, collection, docId) {
     return html;
 }
 
-// ===== WIKI - LEGIÃƒO =====
+// ===== WIKI - LEGIÃO =====
 const legionList = document.getElementById('legion-list');
 legion.forEach((member, index) => {
     const item = document.createElement('div');
@@ -1032,7 +1289,7 @@ function showLegionInfo(index) {
 
     html += `
         <div class="info-section">
-            <h3>DescriÃ§Ã£o</h3>
+            <h3>Descrição</h3>
             <p>${linkifyLocations(member.description)}</p>
         </div>
         <div class="info-section">
@@ -1047,7 +1304,7 @@ function showLegionInfo(index) {
     infoPanel.classList.add('open');
 }
 
-// ===== WIKI - VILÃ•ES =====
+// ===== WIKI - VILÕES =====
 const villainsList = document.getElementById('villains-list');
 villains.forEach((villain, index) => {
     const item = document.createElement('div');
@@ -1081,7 +1338,7 @@ function showVillainInfo(index) {
     }
 
     document.getElementById('city-name').textContent = villain.name;
-    document.getElementById('city-region').textContent = villain.title + ' â€” ' + villain.location;
+    document.getElementById('city-region').textContent = villain.title + ' — ' + villain.location;
 
     let html = '';
 
@@ -1094,7 +1351,7 @@ function showVillainInfo(index) {
 
     html += `
         <div class="info-section">
-            <h3>DescriÃ§Ã£o</h3>
+            <h3>Descrição</h3>
             <p>${desc}</p>
         </div>
         <div class="info-section">
@@ -1153,7 +1410,7 @@ function showArtifactInfo(index) {
 
     html += `
         <div class="info-section">
-            <h3>DescriÃ§Ã£o</h3>
+            <h3>Descrição</h3>
             <p>${linkifyLocations(artifact.description)}</p>
         </div>
         <div class="info-section">
@@ -1212,7 +1469,7 @@ function showBookInfo(index) {
 
     html += `
         <div class="info-section">
-            <h3>DescriÃ§Ã£o</h3>
+            <h3>Descrição</h3>
             <p>${linkifyLocations(book.description)}</p>
         </div>
         <div class="info-section">
@@ -1330,7 +1587,7 @@ function openBookModalNew(index) {
     document.getElementById('session-modal-content').focus();
 }
 
-// ===== WIKI - MARCOS HISTÃ“RICOS =====
+// ===== WIKI - MARCOS HISTÓRICOS =====
 const landmarksList = document.getElementById('landmarks-list');
 if (landmarksList && typeof landmarks !== 'undefined') {
     landmarks.forEach((landmark, index) => {
@@ -1359,11 +1616,11 @@ function showLandmarkInfo(index) {
     }
 
     document.getElementById('city-name').textContent = landmark.name;
-    document.getElementById('city-region').textContent = 'Marco HistÃ³rico';
+    document.getElementById('city-region').textContent = 'Marco Histórico';
 
     let html = `
         <div class="info-section">
-            <h3>DescriÃ§Ã£o</h3>
+            <h3>Descrição</h3>
             <p>${linkifyLocations(landmark.description)}</p>
         </div>
         <div class="info-section">
@@ -1377,7 +1634,7 @@ function showLandmarkInfo(index) {
     infoPanel.classList.add('open');
 }
 
-// ===== WIKI - PERSONAGENS HISTÃ“RICOS =====
+// ===== WIKI - PERSONAGENS HISTÓRICOS =====
 const historicalList = document.getElementById('historical-list');
 if (historicalList && typeof historicalNPCs !== 'undefined') {
     historicalNPCs.forEach((npc, index) => {
@@ -1412,7 +1669,7 @@ function showHistoricalInfo(index) {
     if (npc.image) html += buildPortraitHtml(npc, 'historicalNPCs[' + index + ']', 'historicalNPCs', index);
     html += `
         <div class="info-section">
-            <h3>DescriÃ§Ã£o</h3>
+            <h3>Descrição</h3>
             <p>${linkifyLocations(npc.description)}</p>
         </div>
         <div class="info-section">
@@ -1461,7 +1718,7 @@ function showAllyInfo(index) {
     if (ally.image) html += buildPortraitHtml(ally, 'allies[' + index + ']', 'allies', index);
     html += `
         <div class="info-section">
-            <h3>DescriÃ§Ã£o</h3>
+            <h3>Descrição</h3>
             <p>${linkifyLocations(ally.description)}</p>
         </div>
         <div class="info-section">
@@ -1475,7 +1732,7 @@ function showAllyInfo(index) {
     infoPanel.classList.add('open');
 }
 
-// ===== TOGGLE SEÃ‡Ã•ES WIKI =====
+// ===== TOGGLE SEÇÕES WIKI =====
 function toggleWikiSection(header) {
     header.classList.toggle('open');
     const list = header.nextElementSibling;
@@ -1497,7 +1754,7 @@ function toggleWikiSection(header) {
 
 // ===== LINKIFY LOCAIS E PERSONAGENS =====
 
-// Construir mapeamento de nomes de entidades para aÃ§Ãµes
+// Construir mapeamento de nomes de entidades para ações
 function buildEntityMap() {
     const map = {};
 
@@ -1511,14 +1768,14 @@ function buildEntityMap() {
     // Personagens
     characters.forEach((char, index) => {
         map[char.name] = { type: 'character', index: index };
-        // Adicionar primeiro nome tambÃ©m se tiver sobrenome
+        // Adicionar primeiro nome também se tiver sobrenome
         const firstName = char.name.split(' ')[0];
         if (firstName !== char.name && firstName.length > 3) {
             if (!map[firstName]) map[firstName] = { type: 'character', index: index };
         }
     });
 
-    // LegiÃ£o
+    // Legião
     legion.forEach((member, index) => {
         map[member.name] = { type: 'legion', index: index };
         const firstName = member.name.split(' ')[0];
@@ -1527,7 +1784,7 @@ function buildEntityMap() {
         }
     });
 
-    // VilÃµes
+    // Vilões
     villains.forEach((villain, index) => {
         map[villain.name] = { type: 'villain', index: index };
         const firstName = villain.name.split(' ')[0];
@@ -1550,7 +1807,7 @@ function buildEntityMap() {
         });
     }
 
-    // Personagens HistÃ³ricos
+    // Personagens Históricos
     if (typeof historicalNPCs !== 'undefined') {
         historicalNPCs.forEach((npc, index) => {
             if (npc && npc.name) map[npc.name] = { type: 'historical', index: index };
@@ -1564,7 +1821,7 @@ function buildEntityMap() {
         });
     }
 
-    // Marcos HistÃ³ricos
+    // Marcos Históricos
     if (typeof landmarks !== 'undefined') {
         landmarks.forEach((lm, index) => {
             if (lm && lm.name) map[lm.name] = { type: 'landmark', index: index };
@@ -1609,7 +1866,7 @@ function linkifyLocations(text) {
             const lastClose = before.lastIndexOf('>');
             if (lastOpen > lastClose) return match;
 
-            // Evitar linkar a mesma entidade mÃºltiplas vezes no mesmo texto
+            // Evitar linkar a mesma entidade múltiplas vezes no mesmo texto
             const key = `${entity.type}-${entity.index || entity.id}`;
             if (alreadyLinked.has(key + '-' + offset)) return match;
 
@@ -1672,7 +1929,7 @@ if (wikiSearch) {
             }
         });
 
-        // Abrir seÃ§Ãµes que tÃªm itens visÃ­veis
+        // Abrir seções que têm itens visíveis
         document.querySelectorAll('.wiki-section').forEach(section => {
             const list = section.querySelector('.wiki-section-list');
             const header = section.querySelector('.wiki-section-header');
@@ -1707,7 +1964,7 @@ const trailSeason = document.getElementById('trail-season');
 
 const journeyConfigs = {};
 
-// ===== WIKI - RESUMO DAS SESSÃ•ES =====
+// ===== WIKI - RESUMO DAS SESSÕES =====
 const sessionsList = document.getElementById('sessions-list');
 if (sessionsList && typeof wikiSessions !== 'undefined') {
     const sessionsByJourney = {};
@@ -1895,13 +2152,13 @@ function openSessionFromWiki(wikiSessionIndex) {
     document.getElementById('session-modal-overlay').classList.add('open');
 }
 
-// ===== MODAL DE SESSÃƒO =====
+// ===== MODAL DE SESSÃO =====
 function openSessionModal(sessionId) {
     const session = sessionsData[sessionId];
     if (!session) return;
 
     document.getElementById('session-modal-title').textContent = session.title;
-    const quoteText = session.quote + (session.quoteAuthor ? ' â€” ' + session.quoteAuthor : '');
+    const quoteText = session.quote + (session.quoteAuthor ? ' — ' + session.quoteAuthor : '');
     document.getElementById('session-modal-quote').textContent = quoteText;
     document.getElementById('session-modal-content').textContent = session.content;
 
@@ -1913,7 +2170,7 @@ function openSessionModalFor(journeyKey, sessionId) {
     const session = config.sessions[sessionId];
     if (!session) return;
     document.getElementById('session-modal-title').textContent = session.title;
-    const quoteText = session.quote + (session.quoteAuthor ? ' â€” ' + session.quoteAuthor : '');
+    const quoteText = session.quote + (session.quoteAuthor ? ' — ' + session.quoteAuthor : '');
     document.getElementById('session-modal-quote').textContent = quoteText;
     document.getElementById('session-modal-content').textContent = session.content;
     document.getElementById('session-modal-overlay').classList.add('open');
@@ -2302,7 +2559,7 @@ function debugClick(e) {
     debugPoints.push({ x, y });
 
     const coordsEl = document.getElementById('debug-coords');
-    coordsEl.innerHTML = `<span style="color:#ff0;">Ãšltimo: x: ${x}, y: ${y}</span>`;
+    coordsEl.innerHTML = `<span style="color:#ff0;">Último: x: ${x}, y: ${y}</span>`;
 
     const logEl = document.getElementById('debug-log');
     logEl.innerHTML = debugPoints.map((p, i) => `${i + 1}. x: ${p.x}, y: ${p.y}`).join('<br>');
@@ -2343,17 +2600,17 @@ const langMenu = document.getElementById('lang-menu');
 const fontDragao = document.getElementById('font-dragao');
 let isDragaoFont = false;
 
-// Remove acentos, Ã§, e nÃºmeros de um texto, deixa tudo uppercase
+// Remove acentos, ç, e números de um texto, deixa tudo uppercase
 function removeDiacritics(text) {
     return text
         .toUpperCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')  // remove acentos
-        .replace(/[Ã‡Ã‡]/g, 'C')           // Ã§ â†’ C
-        .replace(/[0-9]/g, '');            // remove nÃºmeros
+        .replace(/[ÇÇ]/g, 'C')           // ç → C
+        .replace(/[0-9]/g, '');            // remove números
 }
 
-// Aplica remoÃ§Ã£o de acentos em todos os nÃ³s de texto visÃ­veis
+// Aplica remoção de acentos em todos os nós de texto visíveis
 function stripAccentsFromDOM() {
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
     while (walker.nextNode()) {
@@ -2381,11 +2638,11 @@ function restoreAccentsInDOM() {
     });
 }
 
-// Observer para aplicar strip em conteÃºdo dinÃ¢mico quando fonte Dragao estÃ¡ ativa
+// Observer para aplicar strip em conteúdo dinâmico quando fonte Dragao está ativa
 let stripTimeout = null;
 const dragaoObserver = new MutationObserver((mutations) => {
     if (!isDragaoFont) return;
-    // Verificar se a mutation Ã© de childList (novo conteÃºdo adicionado), nÃ£o characterData
+    // Verificar se a mutation é de childList (novo conteúdo adicionado), não characterData
     const hasNewContent = mutations.some(m => m.type === 'childList' && m.addedNodes.length > 0);
     if (!hasNewContent) return;
     // Debounce para evitar loops
@@ -2925,6 +3182,14 @@ if (langToggle && langMenu) {
     // Mostrar info do POI no painel lateral
     function showPOIInfo(poi) {
         if (!svgDoc) return;
+
+        // Toggle: clicar de novo no mesmo POI fecha e reseta o zoom
+        if (currentSelectedKey === 'poi:' + poi.id && infoPanel.classList.contains('open')) {
+            deselectAll();
+            return;
+        }
+        currentSelectedKey = 'poi:' + poi.id;
+
         const svgEl = svgDoc.querySelector('svg');
         const overlay = svgDoc.getElementById('dim-overlay');
 
@@ -2978,6 +3243,9 @@ if (langToggle && langMenu) {
 
         document.getElementById('city-info').innerHTML = html;
         infoPanel.classList.add('open');
+
+        // Dar zoom e centralizar no ponto de interesse
+        if (group && typeof zoomToElement === 'function') zoomToElement(group);
     }
 
     // Carregar POIs salvos do Firestore ao iniciar
@@ -3433,7 +3701,7 @@ if (langToggle && langMenu) {
 })();
 
 
-// ===== SIDEBAR DE CONFIGURAÃ‡Ã•ES =====
+// ===== SIDEBAR DE CONFIGURAÇÕES =====
 const settingsToggle = document.getElementById('settings-toggle');
 const settingsSidebar = document.getElementById('settings-sidebar');
 
@@ -3650,7 +3918,7 @@ if (charsheetCloseBtn) {
         return allEntities.find(e => e && e.name && normalize(e.name) === needle) || null;
     }
 
-    // Adicionar membro â€” mostra dropdown com personagens disponiveis
+    // Adicionar membro — mostra dropdown com personagens disponiveis
     journeyAddMember.addEventListener('click', () => {
         // Apenas personagens do menu "Personagens"
         const allChars = (typeof characters !== 'undefined' ? characters : []).filter(c => c && c.name);

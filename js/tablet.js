@@ -245,7 +245,7 @@
         return villains.map(function(v, i) {
             return {
                 name: v.name,
-                subtitle: v.title + (v.location ? ' — ' + v.location : ''),
+                subtitle: v.title + (v.location ? ' • ' + v.location : ''),
                 image: v.image ? getEntityDefaultImageSafe(v) : null,
                 type: 'villain',
                 index: i
@@ -396,7 +396,7 @@
                 if (typeof villains === 'undefined') return null;
                 var villain = villains[item.index];
                 name = villain.name;
-                region = villain.title + ' — ' + villain.location;
+                region = villain.title + ' • ' + villain.location;
                 html = buildEntityHtml(villain, 'villains[' + item.index + ']', 'villains', item.index);
                 break;
 
@@ -447,7 +447,7 @@
                 name = sess.title;
                 region = sess.journeyKey || '';
                 html = '';
-                if (sess.quote) html += '<div class="session-quote">"' + sess.quote + '"' + (sess.quoteAuthor ? ' — ' + sess.quoteAuthor : '') + '</div>';
+                if (sess.quote) html += '<div class="session-quote">"' + sess.quote + '"' + (sess.quoteAuthor ? ' • ' + sess.quoteAuthor : '') + '</div>';
                 if (sess.content) html += '<div class="info-section"><p>' + linkifyWrap(sess.content) + '</p></div>';
                 if (sess.fullText) {
                     html += '<button class="tablet-read-full-btn" onclick="if(typeof showSessionPageInfo===\'function\')showSessionPageInfo(' + item.index + ')">Ver Detalhes</button>';

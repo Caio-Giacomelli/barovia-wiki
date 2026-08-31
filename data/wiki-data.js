@@ -46,7 +46,7 @@ const cities = {
     },
     "velho-moinho": {
         displayName: "Velho Moinho",
-        region: "Estrada entre Vallaki e Baróvia",
+        region: "Estrada entre Vallaki e Barovia",
         description: "",
         population: "",
         government: "",
@@ -99,7 +99,7 @@ const cities = {
         notes: ""
     },
     "vila-da-barovia": {
-        displayName: "Vila da Baróvia",
+        displayName: "Vila da Barovia",
         region: "Leste de Barovia",
         description: "",
         population: "",
@@ -132,7 +132,7 @@ const cities = {
 const cityMaps = {
     "vila-da-barovia": {
         svgFile: "assets/maps/vila-barovia.svg",
-        displayName: "Vila da Baróvia",
+        displayName: "Vila da Barovia",
         cityIds: [
             "igreja-e-cemiterio",
             "casa-durst",

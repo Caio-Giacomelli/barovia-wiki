@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
 
 * {
     margin: 0;
@@ -34,6 +34,10 @@ body {
     height: 100%;
 }
 
+#map-wrapper.zooming {
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 #map-svg {
     width: 100%;
     height: 100%;
@@ -64,7 +68,7 @@ body {
 ::-webkit-scrollbar-track { background: #1a1018; }
 ::-webkit-scrollbar-thumb { background: #6b2f2f; border-radius: 3px; }
 
-/* ===== PAINEL DE INFORMAÃ‡Ã•ES ===== */
+/* ===== PAINEL DE INFORMAÇÕES ===== */
 #info-panel {
     position: fixed;
     top: 0;
@@ -76,7 +80,7 @@ body {
     overflow-y: auto;
     padding: 25px;
     transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 500;
+    z-index: 650;
     font-family: 'Crimson Text', serif;
 }
 
@@ -223,7 +227,7 @@ body {
     left: 15px;
     width: 220px;
     max-height: calc(100vh - 100px);
-    z-index: 499;
+    z-index: 601;
     font-family: 'Crimson Text', serif;
     background: linear-gradient(180deg, #1a1018 0%, #0d0a0e 100%);
     border: 2px solid #6b2f2f;
@@ -232,6 +236,7 @@ body {
     display: flex;
     flex-direction: column;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    transition: top 0.35s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #wiki-sidebar.trail-active {
@@ -283,7 +288,7 @@ body {
     padding: 6px 0;
 }
 
-/* SeÃ§Ãµes */
+/* Seções */
 .wiki-section {
     margin: 0 6px 4px;
     border-radius: 6px;
@@ -561,6 +566,138 @@ body {
     margin-bottom: 15px;
 }
 
+.portrait-wrapper {
+    margin-bottom: 15px;
+}
+
+/* Legenda embaixo da imagem (ex: "Personagem controlado por: ...") */
+.portrait-caption {
+    font-size: 11px;
+    color: #a88;
+    font-style: italic;
+    margin: 0;
+    padding: 2px 0;
+    line-height: 1.3;
+}
+
+.portrait-caption.editable {
+    background: rgba(107, 47, 47, 0.12);
+    border-radius: 4px;
+    padding: 2px 6px;
+}
+
+/* Botoes de arte alternativa (1, 2, 3...) ao lado do retrato */
+.alt-art-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.alt-art-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 2px solid #6b2f2f;
+    background: #1a1018;
+    color: #c44;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.alt-art-btn:hover {
+    background: rgba(107, 47, 47, 0.25);
+    border-color: #c44;
+}
+
+.alt-art-btn.active {
+    background: #6b2f2f;
+    color: #fff;
+    border-color: #c44;
+}
+
+.alt-art-btn.deleteable {
+    border-color: #c55;
+    position: relative;
+}
+
+.alt-art-btn.deleteable::after {
+    content: '\00d7';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 12px;
+    height: 12px;
+    background: #c55;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 9px;
+    line-height: 12px;
+    text-align: center;
+}
+
+.alt-art-btn.deleteable:hover {
+    border-color: #f77;
+    background: rgba(200, 50, 50, 0.2);
+}
+
+/* Botao "+" para adicionar arte alternativa */
+.add-alt-art-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 2px dashed #6b2f2f;
+    background: transparent;
+    color: #c44;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add-alt-art-btn:hover {
+    background: rgba(107, 47, 47, 0.15);
+    border-color: #c44;
+}
+
+.add-alt-art-btn:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+/* Botao "+ Adicionar imagem" (quando a entidade nao tem imagem) */
+.add-image-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    background: transparent;
+    border: 2px dashed #6b2f2f;
+    color: #c44;
+    font-size: 13px;
+    font-family: 'Crimson Text', serif;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.add-image-btn:hover {
+    background: rgba(107, 47, 47, 0.15);
+    border-color: #c44;
+}
+
+.add-image-btn:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
 /* ===== INSTRUCTIONS ===== */
 #instructions {
     position: fixed;
@@ -685,7 +822,7 @@ body {
 .cs-contos-open-btn:hover { border-color: #c44; background: rgba(107, 47, 47, 0.2); }
 
 
-/* ===== BOTÃƒO VOLTAR AO MAPA PRINCIPAL ===== */
+/* ===== BOTÃO VOLTAR AO MAPA PRINCIPAL ===== */
 #back-to-barovia {
     position: fixed;
     top: 15px;
@@ -709,4 +846,977 @@ body {
     background: linear-gradient(180deg, rgba(50,35,25,0.95) 0%, rgba(30,20,15,0.9) 100%);
     border-color: #c9a84c;
     transform: translateX(-50%) scale(1.05);
+}
+
+/* ============================================================
+   ===== UI RESTAURADA (portado do tema base, recolorido) =====
+   ============================================================ */
+
+/* ===== BOTÃO EDITAR (lápis) ===== */
+#edit-btn {
+    position: absolute;
+    top: 15px;
+    right: 60px;
+    width: 36px;
+    height: 36px;
+    background: rgba(107, 47, 47, 0.3);
+    border: 1px solid #6b2f2f;
+    border-radius: 50%;
+    color: #c44;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+#edit-btn:hover {
+    background: rgba(107, 47, 47, 0.6);
+}
+
+#edit-btn.saving {
+    background: rgba(34, 139, 34, 0.3);
+    border-color: #4a9c4a;
+    color: #7ddb7d;
+}
+
+#edit-btn.saving:hover {
+    background: rgba(34, 139, 34, 0.5);
+}
+
+/* Campos editáveis */
+.editable {
+    outline: 1px dashed rgba(107, 47, 47, 0.6);
+    outline-offset: 3px;
+    padding: 4px;
+    border-radius: 4px;
+    min-height: 1.5em;
+    transition: outline-color 0.2s, background 0.2s;
+}
+
+.editable:focus {
+    outline-color: #c44;
+    background: rgba(107, 47, 47, 0.12);
+}
+
+#info-panel.editing #city-name,
+#info-panel.editing #city-region {
+    outline: 1px dashed rgba(107, 47, 47, 0.6);
+    outline-offset: 3px;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+#info-panel.editing #city-name:focus,
+#info-panel.editing #city-region:focus {
+    outline-color: #c44;
+    background: rgba(107, 47, 47, 0.12);
+}
+
+/* ===== TÍTULOS E FECHAR DOS MODAIS ===== */
+#poi-modal h2,
+#wiki-add-modal h2,
+#journey-modal h2,
+#quest-modal-title {
+    font-family: 'Cinzel', serif;
+    color: #c44;
+    margin: 0 0 18px 0;
+    font-size: 20px;
+}
+
+#poi-modal-close,
+#wiki-add-close,
+#journey-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+#poi-modal-close:hover,
+#wiki-add-close:hover,
+#journey-modal-close:hover {
+    color: #fff;
+}
+
+/* ===== FORMULÁRIO GENÉRICO (POI, Wiki-Add, Jornada) ===== */
+.poi-form label {
+    display: block;
+    color: #c44;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    margin-top: 14px;
+    letter-spacing: 0.3px;
+}
+
+.poi-form input[type="text"],
+.poi-form input[type="color"],
+.poi-form textarea,
+.poi-form select {
+    width: 100%;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #4a2a2a;
+    border-radius: 6px;
+    color: #eee;
+    font-size: 13px;
+    font-family: 'Crimson Text', serif;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.poi-form input[type="color"] {
+    height: 38px;
+    padding: 4px;
+    cursor: pointer;
+    -webkit-appearance: auto;
+    appearance: auto;
+}
+
+.poi-form select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23c44' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+    cursor: pointer;
+}
+
+.poi-form select option {
+    background: #1a1018;
+    color: #eee;
+}
+
+.poi-form input[type="text"]:focus,
+.poi-form textarea:focus,
+.poi-form select:focus {
+    outline: none;
+    border-color: #c44;
+}
+
+.poi-form textarea {
+    min-height: 70px;
+    resize: vertical;
+}
+
+.poi-form input::placeholder,
+.poi-form textarea::placeholder {
+    color: #666;
+    font-style: italic;
+}
+
+/* Busca de ícones */
+.poi-icon-search {
+    display: flex;
+    gap: 6px;
+}
+
+.poi-icon-search input {
+    flex: 1;
+}
+
+.poi-icon-search button {
+    padding: 8px 14px;
+    background: rgba(107, 47, 47, 0.4);
+    border: 1px solid #6b2f2f;
+    border-radius: 6px;
+    color: #c44;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.poi-icon-search button:hover {
+    background: rgba(107, 47, 47, 0.7);
+}
+
+#poi-icon-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    gap: 6px;
+    margin-top: 10px;
+    max-height: 160px;
+    overflow-y: auto;
+    padding: 4px;
+}
+
+.poi-icon-option {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.15s;
+}
+
+.poi-icon-option:hover {
+    border-color: #6b2f2f;
+    background: rgba(107, 47, 47, 0.2);
+}
+
+.poi-icon-option.selected {
+    border-color: #c44;
+    background: rgba(107, 47, 47, 0.3);
+}
+
+.poi-icon-option svg {
+    width: 24px;
+    height: 24px;
+    fill: #ddd;
+}
+
+.poi-icon-preview-row {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #999;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#poi-icon-preview {
+    display: inline-flex;
+    align-items: center;
+}
+
+#poi-icon-preview svg {
+    width: 24px;
+    height: 24px;
+    fill: #c44;
+}
+
+/* Upload de imagem */
+.poi-image-upload {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.poi-image-upload button {
+    padding: 6px 12px;
+    background: rgba(107, 47, 47, 0.4);
+    border: 1px solid #6b2f2f;
+    border-radius: 6px;
+    color: #c44;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.poi-image-upload button:hover {
+    background: rgba(107, 47, 47, 0.7);
+}
+
+#poi-image-status {
+    font-size: 11px;
+    color: #999;
+}
+
+#poi-image-preview {
+    margin-top: 6px;
+}
+
+#poi-image-preview img {
+    max-width: 100%;
+    max-height: 120px;
+    border-radius: 6px;
+    border: 1px solid #4a2a2a;
+}
+
+/* Botões salvar / excluir (compartilhado) */
+.journey-save-btn,
+.wiki-add-save {
+    display: block;
+    width: 100%;
+    margin-top: 18px;
+    padding: 11px;
+    font-weight: 600;
+    background: rgba(107, 47, 47, 0.45);
+    border: 1px solid #6b2f2f;
+    border-radius: 6px;
+    color: #e88;
+    font-size: 14px;
+    font-family: 'Crimson Text', serif;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.journey-save-btn:hover,
+.wiki-add-save:hover {
+    background: rgba(107, 47, 47, 0.8);
+    color: #fff;
+}
+
+.delete-page-btn {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px;
+    font-weight: 600;
+    background: rgba(200, 50, 50, 0.2);
+    border: 1px solid #c44;
+    border-radius: 6px;
+    color: #e55;
+    font-size: 13px;
+    font-family: 'Crimson Text', serif;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.delete-page-btn:hover {
+    background: rgba(200, 50, 50, 0.45);
+}
+
+.add-detail-btn {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    padding: 7px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px dashed rgba(107, 47, 47, 0.6);
+    border-radius: 6px;
+    color: #a86868;
+    font-size: 12px;
+    font-family: 'Crimson Text', serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.add-detail-btn:hover {
+    border-color: #c44;
+    color: #c44;
+    background: rgba(107, 47, 47, 0.12);
+}
+
+/* ===== WIKI-ADD FORM (Novo Personagem etc.) ===== */
+#wiki-add-form label {
+    display: block;
+    color: #c44;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    margin-top: 14px;
+    letter-spacing: 0.3px;
+}
+
+#wiki-add-form input[type="text"],
+#wiki-add-form textarea,
+#wiki-add-form select {
+    width: 100%;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #4a2a2a;
+    border-radius: 6px;
+    color: #eee;
+    font-size: 13px;
+    font-family: 'Crimson Text', serif;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+#wiki-add-form select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23c44' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+    cursor: pointer;
+}
+
+#wiki-add-form select option {
+    background: #1a1018;
+    color: #eee;
+}
+
+#wiki-add-form input[type="text"]:focus,
+#wiki-add-form textarea:focus,
+#wiki-add-form select:focus {
+    outline: none;
+    border-color: #c44;
+}
+
+#wiki-add-form textarea {
+    min-height: 70px;
+    resize: vertical;
+}
+
+#wiki-add-form input::placeholder,
+#wiki-add-form textarea::placeholder {
+    color: #666;
+    font-style: italic;
+}
+
+#wiki-add-form textarea.fulltext-area {
+    min-height: 200px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* Botões do modal fulltext */
+.fulltext-modal-btn {
+    position: absolute;
+    top: 15px;
+    right: 60px;
+    padding: 6px 14px;
+    background: rgba(107, 47, 47, 0.45);
+    border: 1px solid #6b2f2f;
+    border-radius: 6px;
+    color: #c44;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.fulltext-modal-btn:hover {
+    background: rgba(107, 47, 47, 0.8);
+}
+
+.fulltext-modal-btn.fulltext-save {
+    right: 120px;
+    border-color: #4ae04a;
+    color: #4ae04a;
+    background: rgba(74, 224, 74, 0.1);
+}
+
+.fulltext-modal-btn.fulltext-save:hover {
+    background: rgba(74, 224, 74, 0.25);
+}
+
+/* ===== MODAL JORNADA (internos) ===== */
+#journey-modal-overlay {
+    gap: 16px;
+}
+
+#journey-stops-list {
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 8px;
+}
+
+.journey-stop-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    margin-bottom: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid #3a2020;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.journey-stop-item .stop-num {
+    color: #6b2f2f;
+    font-weight: bold;
+    min-width: 20px;
+}
+
+.journey-stop-item .stop-title {
+    flex: 1;
+    color: #ddd;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.journey-stop-item .stop-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.journey-stop-item .stop-edit-btn,
+.journey-stop-item .stop-delete-btn,
+.journey-stop-item .stop-move-btn {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 6px;
+    transition: all 0.2s;
+}
+
+.journey-stop-item .stop-edit-btn,
+.journey-stop-item .stop-move-btn {
+    color: #6b2f2f;
+}
+
+.journey-stop-item .stop-edit-btn:hover,
+.journey-stop-item .stop-move-btn:hover:not(:disabled) {
+    color: #c44;
+    border-color: #6b2f2f;
+    background: rgba(107, 47, 47, 0.15);
+}
+
+.journey-stop-item .stop-move-btn:disabled {
+    opacity: 0.2;
+    cursor: default;
+}
+
+.journey-stop-item .stop-delete-btn {
+    color: #944;
+}
+
+.journey-stop-item .stop-delete-btn:hover {
+    color: #f77;
+    border-color: #944;
+    background: rgba(200, 50, 50, 0.1);
+}
+
+.stops-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stops-header label {
+    margin-top: 14px;
+    margin-bottom: 4px;
+}
+
+.reorder-btn {
+    background: none;
+    border: 1px solid #4a2a2a;
+    border-radius: 4px;
+    color: #888;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 2px 6px;
+    line-height: 1;
+    transition: all 0.2s;
+    margin-top: 10px;
+}
+
+.reorder-btn:hover {
+    border-color: #6b2f2f;
+    color: #c44;
+}
+
+#journey-party-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Painel de edição de parada */
+.stop-edit-panel {
+    display: none;
+    background: #1a1018;
+    border: 2px solid #6b2f2f;
+    border-radius: 12px;
+    padding: 25px;
+    width: 90%;
+    max-width: 420px;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    color: #ddd;
+}
+
+#journey-modal-overlay.open .stop-edit-panel.open {
+    display: block;
+}
+
+.stop-edit-panel h3 {
+    font-family: 'Cinzel', serif;
+    color: #c44;
+    margin: 0 0 18px 0;
+    font-size: 17px;
+}
+
+#stop-edit-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+#stop-edit-close:hover {
+    color: #fff;
+}
+
+.stop-edit-coords-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#stop-edit-coords-display {
+    color: #a86868;
+    font-size: 12px;
+}
+
+/* ===== PAINEL DE DEMANDAS (Quests) ===== */
+.quest-panel-header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid rgba(107, 47, 47, 0.4);
+}
+
+.quest-panel-title {
+    margin: 0;
+}
+
+#quest-panel-close {
+    width: 28px;
+    height: 28px;
+    background: rgba(107, 47, 47, 0.25);
+    border: 1px solid rgba(107, 47, 47, 0.5);
+    border-radius: 50%;
+    color: #c44;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+
+#quest-panel-close:hover {
+    background: rgba(107, 47, 47, 0.6);
+}
+
+.quest-panel-journey-select {
+    flex-shrink: 0;
+    padding: 8px 16px;
+}
+
+#quest-journey-select {
+    width: 100%;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(107, 47, 47, 0.5);
+    border-radius: 6px;
+    color: #eee;
+    font-size: 12px;
+    font-family: 'Crimson Text', serif;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23c44' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+    cursor: pointer;
+}
+
+#quest-journey-select:focus {
+    outline: none;
+    border-color: #c44;
+}
+
+#quest-journey-select option {
+    background: #1a1018;
+    color: #eee;
+}
+
+#quest-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#quest-list::-webkit-scrollbar {
+    width: 5px;
+}
+
+#quest-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#quest-list::-webkit-scrollbar-thumb {
+    background: #6b2f2f;
+    border-radius: 3px;
+}
+
+.quest-empty {
+    text-align: center;
+    padding: 24px 12px;
+    color: #888;
+    font-size: 12px;
+    font-style: italic;
+}
+
+.quest-card {
+    background: rgba(107, 47, 47, 0.12);
+    border: 1px solid rgba(107, 47, 47, 0.3);
+    border-left: 3px solid #c44;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+    flex-shrink: 0;
+}
+
+.quest-card:hover {
+    border-color: rgba(107, 47, 47, 0.55);
+}
+
+.quest-card.quest-completed {
+    opacity: 0.5;
+    border-left-color: #555;
+}
+
+.quest-card.quest-completed .quest-card-title {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.quest-card-summary {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 10px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.quest-card-title {
+    font-size: 13px;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+
+.quest-card-info {
+    font-size: 10px;
+    color: #a86868;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+}
+
+.quest-card-info .quest-meta-giver,
+.quest-card-info .quest-meta-loc,
+.quest-meta-giver,
+.quest-meta-loc {
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.quest-card-info .quest-meta-giver:hover,
+.quest-card-info .quest-meta-loc:hover,
+.quest-meta-giver:hover,
+.quest-meta-loc:hover {
+    color: #c44;
+    text-decoration: underline;
+}
+
+.quest-card-badge {
+    font-size: 11px;
+    color: #5b5;
+    flex-shrink: 0;
+}
+
+.quest-card-expand {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.2s ease;
+}
+
+.quest-card-expand > .quest-card-expand-inner {
+    overflow: hidden;
+    min-height: 0;
+}
+
+.quest-card.quest-expanded .quest-card-expand {
+    grid-template-rows: 1fr;
+}
+
+.quest-card-desc {
+    font-size: 12px;
+    color: #bbb;
+    line-height: 1.4;
+    padding: 6px 10px;
+}
+
+.quest-card-actions {
+    display: flex;
+    gap: 6px;
+    padding: 4px 10px 8px;
+    justify-content: flex-end;
+}
+
+.quest-action-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid rgba(107, 47, 47, 0.4);
+    background: rgba(107, 47, 47, 0.15);
+    color: #c44;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.quest-action-btn:hover {
+    border-color: #c44;
+    background: rgba(107, 47, 47, 0.3);
+}
+
+.quest-del-btn {
+    color: #c55;
+    border-color: rgba(200, 50, 50, 0.3);
+}
+
+.quest-del-btn:hover {
+    border-color: #c55;
+    background: rgba(200, 50, 50, 0.15);
+}
+
+.quest-complete-btn {
+    color: #5b5;
+    border-color: rgba(50, 180, 50, 0.3);
+}
+
+.quest-complete-btn:hover {
+    border-color: #5b5;
+    background: rgba(50, 180, 50, 0.15);
+}
+
+.quest-add-btn {
+    flex-shrink: 0;
+    margin: 8px 12px 12px;
+    padding: 8px 14px;
+    background: rgba(107, 47, 47, 0.12);
+    border: 1px dashed rgba(107, 47, 47, 0.55);
+    border-radius: 6px;
+    color: #a86868;
+    font-size: 12px;
+    font-family: 'Crimson Text', serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+}
+
+.quest-add-btn:hover {
+    background: rgba(107, 47, 47, 0.25);
+    border-color: #c44;
+    color: #c44;
+}
+
+/* ===== MODAL DE DEMANDA ===== */
+#quest-modal-overlay {
+    align-items: center;
+    justify-content: center;
+}
+
+.quest-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.quest-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.quest-form-field label {
+    font-size: 10px;
+    color: #a86868;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.quest-form-field input,
+.quest-form-field textarea,
+.quest-form-field select {
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid #4a2a2a;
+    border-radius: 6px;
+    color: #eee;
+    font-size: 13px;
+    font-family: 'Crimson Text', serif;
+}
+
+.quest-form-field input:focus,
+.quest-form-field textarea:focus,
+.quest-form-field select:focus {
+    outline: none;
+    border-color: #c44;
+}
+
+.quest-form-field textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.quest-form-field select option {
+    background: #1a1018;
+    color: #eee;
+}
+
+.quest-form-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.quest-save-btn {
+    flex: 1;
+    padding: 9px 16px;
+    background: #6b2f2f;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 13px;
+    font-family: 'Crimson Text', serif;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.quest-save-btn:hover {
+    background: #c44;
+}
+
+.quest-delete-btn {
+    padding: 9px 16px;
+    background: rgba(200, 50, 50, 0.15);
+    border: 1px solid rgba(200, 50, 50, 0.4);
+    border-radius: 6px;
+    color: #e55;
+    font-size: 13px;
+    font-family: 'Crimson Text', serif;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.quest-delete-btn:hover {
+    background: rgba(200, 50, 50, 0.3);
 }
