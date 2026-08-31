@@ -1,0 +1,17 @@
+# Sistema operacional
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editores
+.vscode/
+.idea/
+
+# Logs / temporarios
+*.log
+*.tmp
+
+# NAO versionar credenciais reais do Firebase
+# (o arquivo real fica local; use firebase-config.example.js como modelo no repo)
+# Descomente a linha abaixo se optar por manter suas chaves fora do repositorio:
+# js/firebase-config.js

@@ -1,0 +1,712 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #0d0d0f;
+    font-family: 'Crimson Text', serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* ===== MAPA ===== */
+#map-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    cursor: grab;
+}
+
+#map-container:active {
+    cursor: grabbing;
+}
+
+#map-wrapper {
+    position: absolute;
+    transform-origin: 0 0;
+    width: 100%;
+    height: 100%;
+}
+
+#map-svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* ===== CIDADES SVG ===== */
+.city-group, .poi {
+    cursor: pointer;
+    transition: filter 0.3s ease;
+}
+
+.city-group:hover, .poi:hover {
+    filter: drop-shadow(0 0 8px rgba(180, 60, 60, 0.7)) brightness(1.2);
+}
+
+.city-group.active, .poi.active {
+    filter: drop-shadow(0 0 12px rgba(180, 60, 60, 0.9)) brightness(1.3);
+    animation: pulse-barovia 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-barovia {
+    0%, 100% { filter: drop-shadow(0 0 12px rgba(180, 60, 60, 0.9)) brightness(1.3); }
+    50% { filter: drop-shadow(0 0 20px rgba(200, 50, 50, 1)) brightness(1.5); }
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #1a1018; }
+::-webkit-scrollbar-thumb { background: #6b2f2f; border-radius: 3px; }
+
+/* ===== PAINEL DE INFORMAÃ‡Ã•ES ===== */
+#info-panel {
+    position: fixed;
+    top: 0;
+    right: -380px;
+    width: 380px;
+    height: 100vh;
+    background: linear-gradient(180deg, #1a1018 0%, #0d0a0e 100%);
+    border-left: 3px solid #6b2f2f;
+    overflow-y: auto;
+    padding: 25px;
+    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 500;
+    font-family: 'Crimson Text', serif;
+}
+
+#info-panel.open {
+    right: 0;
+}
+
+#info-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+}
+
+#close-panel {
+    position: absolute;
+    top: 15px; right: 15px;
+    width: 36px; height: 36px;
+    background: rgba(107, 47, 47, 0.3);
+    border: 1px solid #6b2f2f;
+    border-radius: 50%;
+    color: #c44;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+}
+
+#close-panel:hover {
+    background: rgba(107, 47, 47, 0.6);
+}
+
+#city-name {
+    font-family: 'Cinzel', serif;
+    font-size: 26px;
+    color: #c44;
+    margin-bottom: 5px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(107, 47, 47, 0.4);
+}
+
+#city-region {
+    font-family: 'Crimson Text', serif;
+    font-size: 14px;
+    color: #8a6060;
+    font-style: italic;
+    margin-bottom: 20px;
+}
+
+.info-section {
+    margin-bottom: 20px;
+}
+
+.info-section h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    color: #c44;
+    margin-bottom: 8px;
+}
+
+.info-section p {
+    font-size: 15px;
+    color: #bbb;
+    line-height: 1.6;
+}
+
+.info-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.info-section ul li {
+    color: #bbb;
+    font-size: 14px;
+    padding: 4px 0 4px 18px;
+    position: relative;
+}
+
+.info-section ul li::before {
+    content: '\2020';
+    position: absolute;
+    left: 0;
+    color: #6b2f2f;
+}
+
+/* ===== CONTROLES DE ZOOM ===== */
+#zoom-controls {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    z-index: 500;
+}
+
+.zoom-btn {
+    width: 40px;
+    height: 40px;
+    background: rgba(13, 10, 14, 0.9);
+    border: 2px solid #6b2f2f;
+    border-radius: 8px;
+    color: #c44;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+}
+
+.zoom-btn:hover {
+    background: rgba(107, 47, 47, 0.4);
+}
+
+.music-btn.playing {
+    background: rgba(107, 47, 47, 0.5);
+    border-color: #c44;
+    animation: music-pulse-b 1.5s ease-in-out infinite;
+}
+
+@keyframes music-pulse-b {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(196, 68, 68, 0.3); }
+    50% { box-shadow: 0 0 8px 3px rgba(196, 68, 68, 0.3); }
+}
+
+#music-timer {
+    position: fixed;
+    bottom: 205px;
+    right: 20px;
+    background: rgba(13, 10, 14, 0.9);
+    border: 1px solid #6b2f2f;
+    border-radius: 6px;
+    color: #c44;
+    font-size: 10px;
+    padding: 3px 6px;
+    z-index: 500;
+    font-family: monospace;
+}
+
+/* ===== WIKI SIDEBAR ===== */
+#wiki-sidebar {
+    position: fixed;
+    top: 60px;
+    left: 15px;
+    width: 220px;
+    max-height: calc(100vh - 100px);
+    z-index: 499;
+    font-family: 'Crimson Text', serif;
+    background: linear-gradient(180deg, #1a1018 0%, #0d0a0e 100%);
+    border: 2px solid #6b2f2f;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+#wiki-sidebar.trail-active {
+    top: 155px;
+    max-height: calc(100vh - 195px);
+}
+
+.wiki-sidebar-header {
+    padding: 14px 12px 10px;
+    border-bottom: 1px solid rgba(107, 47, 47, 0.4);
+    flex-shrink: 0;
+}
+
+.wiki-sidebar-title {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    color: #c44;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.wiki-search-wrapper {
+    position: relative;
+}
+
+#wiki-search {
+    width: 100%;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid #4a2a2a;
+    border-radius: 6px;
+    color: #ddd;
+    font-size: 12px;
+    font-family: 'Crimson Text', serif;
+}
+
+#wiki-search:focus {
+    outline: none;
+    border-color: #c44;
+}
+
+#wiki-search::placeholder {
+    color: #666;
+}
+
+.wiki-sidebar-content {
+    overflow-y: auto;
+    flex: 1;
+    padding: 6px 0;
+}
+
+/* SeÃ§Ãµes */
+.wiki-section {
+    margin: 0 6px 4px;
+    border-radius: 6px;
+    border: 1px solid rgba(107, 47, 47, 0.2);
+    overflow: hidden;
+}
+
+.wiki-section:hover {
+    border-color: rgba(107, 47, 47, 0.4);
+}
+
+.wiki-section-header {
+    padding: 9px 12px;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    color: #c44;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.wiki-section-header:hover {
+    background: rgba(107, 47, 47, 0.15);
+}
+
+.wiki-section-header .arrow {
+    transition: transform 0.3s;
+    font-size: 11px;
+}
+
+.wiki-section-header.open .arrow {
+    transform: rotate(90deg);
+}
+
+.wiki-section-list {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out;
+}
+
+.wiki-section-list.open {
+    max-height: 800px;
+    overflow-y: auto;
+    transition: max-height 0.4s ease-in;
+}
+
+.wiki-item {
+    padding: 6px 12px 6px 18px;
+    font-size: 13px;
+    color: #999;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+}
+
+.wiki-item:hover {
+    color: #c44;
+    background: rgba(107, 47, 47, 0.1);
+}
+
+.wiki-item.active {
+    color: #c44;
+    background: rgba(107, 47, 47, 0.15);
+    border-left: 2px solid #c44;
+}
+
+.wiki-add-item {
+    padding: 6px 12px;
+    font-size: 11px;
+    color: #6b2f2f;
+    cursor: pointer;
+    text-align: center;
+    transition: color 0.2s;
+}
+
+.wiki-add-item:hover {
+    color: #c44;
+}
+
+/* ===== SETTINGS SIDEBAR ===== */
+#settings-toggle {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    background: rgba(13, 10, 14, 0.9);
+    border: 2px solid #6b2f2f;
+    border-radius: 8px;
+    color: #c44;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 600;
+    transition: background 0.2s;
+}
+
+#settings-toggle:hover, #settings-toggle.open {
+    background: rgba(107, 47, 47, 0.4);
+}
+
+#settings-sidebar {
+    position: fixed;
+    top: 0; right: -240px;
+    width: 240px; height: 100vh;
+    background: linear-gradient(180deg, #1a1018 0%, #0d0a0e 100%);
+    border-left: 2px solid #6b2f2f;
+    z-index: 550;
+    padding: 70px 18px 20px;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+}
+
+#settings-sidebar.open {
+    right: 0;
+}
+
+.settings-section {
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(107, 47, 47, 0.3);
+}
+
+.settings-section:last-child {
+    border-bottom: none;
+}
+
+.settings-section-title {
+    color: #6b2f2f;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+.settings-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    background: transparent;
+    border: 1px solid #333;
+    border-radius: 6px;
+    color: #bbb;
+    font-size: 12px;
+    font-family: 'Crimson Text', serif;
+    cursor: pointer;
+    margin-bottom: 6px;
+    transition: all 0.2s;
+}
+
+.settings-btn:hover {
+    background: rgba(107, 47, 47, 0.2);
+    border-color: #6b2f2f;
+    color: #c44;
+}
+
+.settings-btn.active {
+    background: rgba(107, 47, 47, 0.3);
+    border-color: #c44;
+    color: #c44;
+}
+
+/* ===== TRAIL / JORNADA ===== */
+#trail-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    padding: 8px 16px;
+    background: rgba(13, 10, 14, 0.9);
+    border: 2px solid #6b2f2f;
+    border-radius: 8px;
+    color: #c44;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    cursor: pointer;
+    z-index: 500;
+    transition: background 0.2s;
+}
+
+#trail-btn:hover {
+    background: rgba(107, 47, 47, 0.3);
+}
+
+#trail-controls {
+    position: fixed;
+    top: 55px;
+    left: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-width: 230px;
+    z-index: 500;
+}
+
+.trail-ctrl-btn {
+    padding: 5px 10px;
+    background: rgba(13, 10, 14, 0.9);
+    border: 1px solid #6b2f2f;
+    border-radius: 6px;
+    color: #c44;
+    font-size: 11px;
+    font-family: 'Crimson Text', serif;
+    cursor: pointer;
+}
+
+.trail-ctrl-btn:hover {
+    background: rgba(107, 47, 47, 0.3);
+}
+
+/* ===== SELETOR DE IDIOMA / FERRAMENTAS ===== */
+#lang-selector {
+    position: fixed;
+    bottom: 15px;
+    left: 15px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 500;
+}
+
+.lang-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    font-family: 'Crimson Text', serif;
+    font-size: 13px;
+    font-weight: 600;
+    background: rgba(13, 10, 14, 0.9);
+    border: 2px solid #6b2f2f;
+    border-radius: 8px;
+    color: #c44;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.lang-btn:hover {
+    background: rgba(107, 47, 47, 0.4);
+}
+
+.lang-btn.active {
+    border-color: #c44;
+    background: rgba(107, 47, 47, 0.3);
+}
+
+/* Pin */
+.pin-toggle { padding: 0; width: 34px; height: 34px; }
+.pin-icon { stroke: #c44; width: 18px; height: 18px; }
+.pin-toggle.active { border-color: #c44; background: rgba(107, 47, 47, 0.3); }
+
+/* Quest */
+.quest-toggle { padding: 0; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; }
+.quest-icon { stroke: #c44; width: 16px; height: 16px; }
+.quest-toggle.active { border-color: #c44; background: rgba(107, 47, 47, 0.3); }
+
+/* ===== IMAGEM NO PAINEL ===== */
+.info-portrait {
+    width: 100%;
+    max-width: 200px;
+    border-radius: 8px;
+    border: 2px solid #6b2f2f;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.portrait-container {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+/* ===== INSTRUCTIONS ===== */
+#instructions {
+    position: fixed;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(13, 10, 14, 0.85);
+    border: 1px solid #4a2a2a;
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: #888;
+    font-size: 12px;
+    z-index: 100;
+    pointer-events: none;
+}
+
+/* ===== MODALS ===== */
+#poi-modal-overlay,
+#wiki-add-overlay,
+#journey-modal-overlay,
+#quest-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+}
+
+#poi-modal-overlay.open,
+#wiki-add-overlay.open,
+#journey-modal-overlay.open,
+#quest-modal-overlay.open {
+    display: flex;
+}
+
+#poi-modal,
+#wiki-add-modal,
+#journey-modal,
+#quest-modal {
+    background: linear-gradient(135deg, #1a1018 0%, #0d0a0e 100%);
+    border: 2px solid #6b2f2f;
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    max-width: 480px;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.8);
+}
+
+/* ===== QUEST PANEL ===== */
+#quest-panel {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    width: 440px;
+    max-height: 75vh;
+    background: linear-gradient(180deg, #1a1018 0%, #0d0a0e 100%);
+    border: 2px solid #6b2f2f;
+    border-radius: 10px;
+    z-index: 9500;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+}
+
+#quest-panel.quest-panel-open {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    pointer-events: all;
+}
+
+.quest-panel-title {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    color: #c44;
+}
+
+.quest-card {
+    border-left: 3px solid #6b2f2f;
+}
+.quest-card-title {
+    font-family: 'Cinzel', serif;
+    color: #c44;
+}
+
+/* ===== CHARSHEET ===== */
+#charsheet-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #0d0d0f;
+    z-index: 11000;
+    overflow-y: auto;
+}
+#charsheet-overlay.open { display: block; }
+
+.cs-char-name { font-family: 'Cinzel', serif; color: #c44; }
+.cs-toolbar-title { font-family: 'Cinzel', serif; color: #c44; }
+.cs-stat-pill { border-color: rgba(107, 47, 47, 0.4); background: rgba(107, 47, 47, 0.08); }
+.cs-stat-val { color: #c44; font-family: 'Cinzel', serif; }
+.cs-ability-box { border-color: rgba(107, 47, 47, 0.4); background: rgba(26, 16, 24, 0.8); }
+.cs-ab-name { color: #6b2f2f; }
+.cs-ab-score { color: #c44; font-family: 'Cinzel', serif; }
+.cs-collapse-header { background: rgba(26, 16, 24, 0.6); color: #c44; font-family: 'Cinzel', serif; }
+.cs-collapse-arrow { color: #6b2f2f; }
+.cs-feat-name { color: #c44; }
+.cs-toolbar-btn { border-color: #6b2f2f; color: #c44; background: rgba(107, 47, 47, 0.2); }
+.cs-toolbar-btn:hover { background: rgba(107, 47, 47, 0.5); }
+.cs-toolbar-btn.cs-save { background: #6b2f2f; color: #fff; }
+.cs-combat-btn.cs-active { background: rgba(196, 68, 68, 0.3); border-color: #c44; }
+.cs-slot-pill { border-color: rgba(80, 40, 80, 0.4); background: rgba(80, 40, 80, 0.1); }
+.cs-slot-lvl { color: #8a5080; }
+.cs-portrait { border-color: #6b2f2f; }
+.cs-contos-open-btn { border-color: #6b2f2f; color: #c44; background: rgba(26, 16, 24, 0.8); }
+.cs-contos-open-btn:hover { border-color: #c44; background: rgba(107, 47, 47, 0.2); }
+
+
+/* ===== BOTÃƒO VOLTAR AO MAPA PRINCIPAL ===== */
+#back-to-barovia {
+    position: fixed;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: linear-gradient(180deg, rgba(30,20,15,0.95) 0%, rgba(15,10,8,0.9) 100%);
+    border: 1px solid rgba(180, 140, 80, 0.4);
+    color: #c9a84c;
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+#back-to-barovia:hover {
+    background: linear-gradient(180deg, rgba(50,35,25,0.95) 0%, rgba(30,20,15,0.9) 100%);
+    border-color: #c9a84c;
+    transform: translateX(-50%) scale(1.05);
+}

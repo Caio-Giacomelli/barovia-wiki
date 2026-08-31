@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  width="8192"
+  height="6144"
+  viewBox="0 0 8192 6144"
+  role="img"
+  aria-labelledby="map-title map-description">
+  <title id="map-title">Mapa de Barovia</title>
+  <desc id="map-description">Mapa dos jogadores com pontos de interesse conhecidos e sem nomes secretos.</desc>
+
+  <style>
+    .poi {
+      cursor: pointer;
+    }
+
+    .poi-shape {
+      fill: #d4a843;
+      fill-opacity: 0;
+      stroke: #f4d675;
+      stroke-opacity: 0;
+      stroke-width: 14;
+      vector-effect: non-scaling-stroke;
+      pointer-events: all;
+      transition: fill-opacity 180ms ease, stroke-opacity 180ms ease;
+    }
+
+    .poi:hover .poi-shape,
+    .poi:focus .poi-shape {
+      fill-opacity: 0.18;
+      stroke-opacity: 0.9;
+    }
+
+    .poi.active .poi-shape,
+    .poi.city-highlighted .poi-shape,
+    .poi.highlighted .poi-shape {
+      fill-opacity: 0.28;
+      stroke-opacity: 1;
+    }
+
+    .poi.city-dimmed .poi-shape,
+    .poi.dimmed .poi-shape {
+      fill-opacity: 0.04;
+      stroke-opacity: 0.12;
+    }
+  </style>
+
+  <!-- A arte sem nomes permanece raster; apenas os pontos de interesse são formas SVG. -->
+  <image
+    id="map-background"
+    href="mapa-barovia-sem-nomes.jpg"
+    xlink:href="mapa-barovia-sem-nomes.jpg"
+    x="0"
+    y="0"
+    width="8192"
+    height="6144"
+    preserveAspectRatio="xMidYMid meet"
+    pointer-events="none" />
+
+  <g id="points-of-interest">
+    <g id="krezk" class="poi" data-status="known" data-name="Krezk" tabindex="0" aria-label="Krezk">
+      <title>Krezk</title>
+      <ellipse class="poi-shape" cx="874" cy="1798" rx="118" ry="166" />
+    </g>
+
+    <g id="vallaki" class="poi" data-status="known" data-name="Vallaki" tabindex="0" aria-label="Vallaki">
+      <title>Vallaki</title>
+      <ellipse class="poi-shape" cx="3276" cy="1984" rx="176" ry="144" />
+    </g>
+
+    <g id="acampamento-vistani" class="poi" data-status="known" data-name="Acampamento Vistani" tabindex="0" aria-label="Acampamento Vistani">
+      <title>Acampamento Vistani</title>
+      <ellipse class="poi-shape" cx="3136" cy="2200" rx="104" ry="80" />
+    </g>
+
+    <g id="velho-moinho" class="poi" data-status="known" data-name="Velho Moinho" tabindex="0" aria-label="Velho Moinho">
+      <title>Velho Moinho</title>
+      <ellipse class="poi-shape" cx="4024" cy="2420" rx="160" ry="192" />
+    </g>
+
+    <g id="argynvostholt" class="poi" data-status="known" data-name="Argynvostholt" tabindex="0" aria-label="Argynvostholt">
+      <title>Argynvostholt</title>
+      <ellipse class="poi-shape" cx="2674" cy="2964" rx="142" ry="140" />
+    </g>
+
+    <g id="portao-oeste" class="poi" data-status="known" data-name="Portão Oeste" tabindex="0" aria-label="Portão Oeste">
+      <title>Portão Oeste</title>
+      <ellipse class="poi-shape" cx="4892" cy="2722" rx="164" ry="166" />
+    </g>
+
+    <g id="castelo-ravenloft" class="poi" data-status="known" data-name="Castelo Ravenloft" tabindex="0" aria-label="Castelo Ravenloft">
+      <title>Castelo Ravenloft</title>
+      <ellipse class="poi-shape" cx="5824" cy="3002" rx="252" ry="238" />
+    </g>
+
+    <g id="cachoeiras-tser" class="poi" data-status="known" data-name="Cachoeiras Tser" tabindex="0" aria-label="Cachoeiras Tser">
+      <title>Cachoeiras Tser</title>
+      <ellipse class="poi-shape" cx="4852" cy="3322" rx="300" ry="206" transform="rotate(12 4852 3322)" />
+    </g>
+
+    <g id="acampamento-vistani-lago-tser" class="poi" data-status="known" data-name="Acampamento Vistani do Lago Tser" tabindex="0" aria-label="Acampamento Vistani do Lago Tser">
+      <title>Acampamento Vistani do Lago Tser</title>
+      <ellipse class="poi-shape" cx="5404" cy="3686" rx="128" ry="154" transform="rotate(-24 5404 3686)" />
+    </g>
+
+    <g id="vila-da-barovia" class="poi" data-status="known" data-name="Vila da Baróvia" tabindex="0" aria-label="Vila da Baróvia">
+      <title>Vila da Baróvia</title>
+      <ellipse class="poi-shape" cx="6488" cy="3760" rx="296" ry="248" />
+    </g>
+
+    <g id="portao-leste" class="poi" data-status="known" data-name="Portão Leste" tabindex="0" aria-label="Portão Leste">
+      <title>Portão Leste</title>
+      <ellipse class="poi-shape" cx="7650" cy="3318" rx="170" ry="182" />
+    </g>
+
+    <g id="encruzilhada-rio-ivlis" class="poi" data-status="known" data-name="Encruzilhada do Rio Ivlis" tabindex="0" aria-label="Encruzilhada do Rio Ivlis">
+      <title>Encruzilhada do Rio Ivlis</title>
+      <ellipse class="poi-shape" cx="5572" cy="4300" rx="120" ry="140" transform="rotate(-20 5572 4300)" />
+    </g>
+  </g>
+</svg>
