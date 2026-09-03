@@ -110,6 +110,11 @@ function initSvg() {
             filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.5));
             transition: opacity 0.4s ease, filter 0.4s ease;
         }
+        /* Dica de composicao: prepara a camada dos filtros/animacoes de sangue
+           antes do primeiro clique, evitando o hitch de rasterizacao inicial. */
+        .blood-path, .blood-drips {
+            will-change: filter, stroke-dashoffset, opacity, transform;
+        }
         .city-normal {
             transition: opacity 0.4s ease;
         }
@@ -393,6 +398,51 @@ function initSvg() {
         const ref = Math.min(bbox.width, bbox.height);
         const nStains = 5 + Math.floor(rand() * 3); // 5 a 7 manchas
 
+        // Gera um contorno FECHADO e SUAVE (curvas de Bezier) a partir de pontos
+        // radiais. Usa Catmull-Rom -> Bezier para que a borda seja continua e
+        // organica, sem os "cantos" retos que davam o aspecto poligonizado.
+        function organicBlobPath(cx, cy, baseR, points, irregularity, squashY) {
+            // Amostra raios em torno do centro com variacao suave/ruidosa.
+            const angs = [];
+            const radii = [];
+            for (let k = 0; k < points; k++) {
+                // Pequeno jitter angular (proporcional a irregularity) para
+                // manter os pontos quase uniformemente espacados => mais redondo.
+                const ang = (k / points) * Math.PI * 2 + (rand() - 0.5) * (Math.PI / points) * irregularity;
+                // Variacao de raio suave: quanto menor irregularity, mais proximo
+                // de um circulo perfeito (so leves ondulacoes na borda).
+                const rr = baseR * (1 - irregularity + rand() * irregularity * 2);
+                angs.push(ang);
+                radii.push(rr);
+            }
+            // Converte para pontos cartesianos (achatando levemente em Y).
+            const P = [];
+            for (let k = 0; k < points; k++) {
+                P.push({
+                    x: cx + Math.cos(angs[k]) * radii[k],
+                    y: cy + Math.sin(angs[k]) * radii[k] * squashY
+                });
+            }
+            // Catmull-Rom -> curvas cubicas de Bezier (fechado).
+            const n = P.length;
+            let d = 'M' + P[0].x.toFixed(1) + ',' + P[0].y.toFixed(1) + ' ';
+            for (let k = 0; k < n; k++) {
+                const p0 = P[(k - 1 + n) % n];
+                const p1 = P[k];
+                const p2 = P[(k + 1) % n];
+                const p3 = P[(k + 2) % n];
+                const c1x = p1.x + (p2.x - p0.x) / 6;
+                const c1y = p1.y + (p2.y - p0.y) / 6;
+                const c2x = p2.x - (p3.x - p1.x) / 6;
+                const c2y = p2.y - (p3.y - p1.y) / 6;
+                d += 'C' + c1x.toFixed(1) + ',' + c1y.toFixed(1) + ' '
+                    + c2x.toFixed(1) + ',' + c2y.toFixed(1) + ' '
+                    + p2.x.toFixed(1) + ',' + p2.y.toFixed(1) + ' ';
+            }
+            d += 'Z';
+            return d;
+        }
+
         for (let i = 0; i < nStains; i++) {
             // Posicao dentro da bbox (o clip garante que fique dentro do path)
             const cx = bbox.x + (0.12 + rand() * 0.76) * bbox.width;
@@ -400,38 +450,30 @@ function initSvg() {
             // Raio variado (manchas um pouco maiores para serem perceptiveis)
             const r = ref * (0.09 + rand() * 0.15);
 
-            // Blob organico irregular (nao um circulo perfeito)
-            const pts = 7 + Math.floor(rand() * 3);
-            let d = '';
-            for (let k = 0; k < pts; k++) {
-                const ang = (k / pts) * Math.PI * 2;
-                const rr = r * (0.6 + rand() * 0.6);
-                const px = cx + Math.cos(ang) * rr;
-                const py = cy + Math.sin(ang) * rr * 0.85;
-                d += (k === 0 ? 'M' : 'L') + px.toFixed(1) + ',' + py.toFixed(1) + ' ';
-            }
-            d += 'Z';
-
-            const blob = svgDoc.createElementNS(SVGNS, 'path');
-            blob.setAttribute('d', d);
-            // Vermelho-sangue escuro e translucido, perceptivel mas nao gritante
+            // Cor vermelho-sangue escuro e translucido, perceptivel sem gritar.
             const alpha = (0.45 + rand() * 0.25).toFixed(2);
             const rc = 120 + Math.floor(rand() * 45); // 120-165
-            blob.setAttribute('fill', 'rgba(' + rc + ',18,18,' + alpha + ')');
+            const fill = 'rgba(' + rc + ',18,18,' + alpha + ')';
+
+            // Mancha principal: contorno suave e bem arredondado (curvas de Bezier).
+            // irregularity baixo + squashY perto de 1 => forma quase circular,
+            // so com pequenas ondulacoes organicas na borda.
+            const blob = svgDoc.createElementNS(SVGNS, 'path');
+            const pts = 10 + Math.floor(rand() * 4); // mais pontos = borda mais suave
+            blob.setAttribute('d', organicBlobPath(cx, cy, r, pts, 0.5, 0.94 + rand() * 0.06));
+            blob.setAttribute('fill', fill);
             blob.style.pointerEvents = 'none';
             stainGroup.appendChild(blob);
 
-            // Alguns respingos minusculos ao redor
-            if (rand() > 0.5) {
-                const drops = 1 + Math.floor(rand() * 2);
+            // Respingos minusculos ao redor - arredondados e discretos.
+            if (rand() > 0.4) {
+                const drops = 1 + Math.floor(rand() * 3);
                 for (let dI = 0; dI < drops; dI++) {
-                    const dr = r * (0.12 + rand() * 0.18);
-                    const dx = cx + (rand() - 0.5) * r * 3;
-                    const dy = cy + (rand() - 0.5) * r * 3;
-                    const dot = svgDoc.createElementNS(SVGNS, 'circle');
-                    dot.setAttribute('cx', dx.toFixed(1));
-                    dot.setAttribute('cy', dy.toFixed(1));
-                    dot.setAttribute('r', dr.toFixed(1));
+                    const dr = r * (0.1 + rand() * 0.16);
+                    const dx = cx + (rand() - 0.5) * r * 3.2;
+                    const dy = cy + (rand() - 0.5) * r * 3.2;
+                    const dot = svgDoc.createElementNS(SVGNS, 'path');
+                    dot.setAttribute('d', organicBlobPath(dx, dy, dr, 8, 0.12, 0.95 + rand() * 0.05));
                     dot.setAttribute('fill', 'rgba(120,14,14,' + (0.32 + rand() * 0.22).toFixed(2) + ')');
                     dot.style.pointerEvents = 'none';
                     stainGroup.appendChild(dot);
@@ -524,6 +566,48 @@ function initSvg() {
     });
 
     fitMapToScreen();
+
+    // Pre-aquecer (warm-up) o primeiro clique. A "travadinha" na primeira
+    // selecao vem de trabalho que o navegador so faz sob demanda:
+    //  1) montar o cache de geometria do SVG (getTotalLength/getPointAtLength/
+    //     getBBox/getScreenCTM) na primeira consulta a cada path de POI;
+    //  2) rasterizar pela primeira vez as camadas de filtro (drop-shadow) e o
+    //     mix-blend-mode das manchas.
+    // Fazemos esse trabalho uma vez, em tempo ocioso, para que o clique real
+    // ja encontre tudo pronto e seja fluido.
+    warmUpPoiInteractions(svgDoc);
+}
+
+// Pre-aquece caches de geometria e camadas de composicao dos POIs.
+function warmUpPoiInteractions(doc) {
+    if (!doc || warmUpPoiInteractions._done) return;
+    warmUpPoiInteractions._done = true;
+
+    const run = () => {
+        try {
+            activeCityIds.forEach(id => {
+                const group = doc.getElementById(id);
+                if (!group) return;
+                const pathEl = group.querySelector('.blood-path')
+                    || group.querySelector(':scope > path')
+                    || group.querySelector('path');
+                if (!pathEl) return;
+                // Forca o navegador a construir o cache interno de geometria do
+                // path (comprimento/segmentos) e do bounding box agora, e nao no
+                // primeiro clique.
+                try { pathEl.getTotalLength(); } catch (e) {}
+                try { pathEl.getPointAtLength(0); } catch (e) {}
+                try { pathEl.getBBox(); } catch (e) {}
+                try { pathEl.getScreenCTM(); } catch (e) {}
+            });
+        } catch (e) { /* warm-up e best-effort; nunca deve quebrar a pagina */ }
+    };
+
+    if (typeof requestIdleCallback === 'function') {
+        requestIdleCallback(run, { timeout: 1200 });
+    } else {
+        setTimeout(run, 200);
+    }
 }
 
 // Registrar o load event E verificar se já carregou
@@ -2697,8 +2781,8 @@ if (langToggle && langMenu) {
 (function() {
     const musicBtn = document.getElementById('music-btn');
     const musicTimer = document.getElementById('music-timer');
-    const audio = new Audio('assets/songs/boa noite meu consagrado - Geovanna Lorena (youtube).mp3');
-    audio.loop = true;
+    const audio = new Audio('assets/songs/2. Into The Mists - Curse Of Strahd Soundtrack by Travis Savoie - RPG Music Maker - Travis Savoie (youtube).mp3');
+    audio.loop = true; // ao terminar, volta do comeco automaticamente
 
     let isPlaying = false;
     let totalSeconds = 0;
@@ -2793,12 +2877,37 @@ if (langToggle && langMenu) {
     let selectedIconSvg = '';
     let selectedIconId = '';
     let selectedImage = '';
+    const DEFAULT_ICON_COLOR = '#d4a843';
+    let selectedIconColor = DEFAULT_ICON_COLOR;
     let customPOIs = []; // carregado do Firestore
     let editingPOI = null; // POI sendo editado
     const poiDeleteBtn = document.getElementById('poi-delete-btn');
     const poiImageBtn = document.getElementById('poi-image-btn');
     const poiImageStatus = document.getElementById('poi-image-status');
     const poiImagePreview = document.getElementById('poi-image-preview');
+    const poiIconColorInput = document.getElementById('poi-icon-color');
+    const poiColorSwatches = document.querySelectorAll('.poi-color-swatch');
+
+    // Sincronizar swatches -> input de cor
+    poiColorSwatches.forEach(sw => {
+        sw.addEventListener('click', () => {
+            selectedIconColor = sw.dataset.color;
+            if (poiIconColorInput) poiIconColorInput.value = selectedIconColor;
+            updateIconPreviewColor();
+        });
+    });
+    if (poiIconColorInput) {
+        poiIconColorInput.addEventListener('input', () => {
+            selectedIconColor = poiIconColorInput.value;
+            updateIconPreviewColor();
+        });
+    }
+
+    // Aplicar a cor escolhida ao preview do icone no modal
+    function updateIconPreviewColor() {
+        const svgIcon = poiIconPreview && poiIconPreview.querySelector('svg');
+        if (svgIcon) applyIconColor(svgIcon, selectedIconColor);
+    }
 
     // Toggle modo PIN
     pinBtn.addEventListener('click', () => {
@@ -2863,7 +2972,10 @@ if (langToggle && langMenu) {
             selectedIconSvg = existingPOI.iconSvg || '';
             selectedIconId = existingPOI.iconId || '';
             selectedImage = existingPOI.image || '';
+            selectedIconColor = existingPOI.iconColor || DEFAULT_ICON_COLOR;
+            if (poiIconColorInput) poiIconColorInput.value = selectedIconColor;
             poiIconPreview.innerHTML = selectedIconSvg || 'Nenhum';
+            updateIconPreviewColor();
             if (selectedImage) {
                 poiImagePreview.innerHTML = '<img src="' + selectedImage + '" alt="Preview">';
                 poiImageStatus.textContent = 'Imagem atual';
@@ -2880,6 +2992,8 @@ if (langToggle && langMenu) {
             selectedIconSvg = '';
             selectedIconId = '';
             selectedImage = '';
+            selectedIconColor = DEFAULT_ICON_COLOR;
+            if (poiIconColorInput) poiIconColorInput.value = selectedIconColor;
             poiIconPreview.textContent = 'Nenhum';
             poiImagePreview.innerHTML = '';
             poiImageStatus.textContent = 'Nenhuma';
@@ -2968,6 +3082,7 @@ if (langToggle && langMenu) {
                     selectedIconSvg = result.svgText;
                     selectedIconId = result.iconName;
                     poiIconPreview.innerHTML = result.svgText;
+                    updateIconPreviewColor();
                 });
                 poiIconResults.appendChild(option);
             });
@@ -2994,6 +3109,7 @@ if (langToggle && langMenu) {
                     selectedIconSvg = result.svgText;
                     selectedIconId = result.iconName;
                     poiIconPreview.innerHTML = result.svgText;
+                    updateIconPreviewColor();
                 });
                 poiIconResults.appendChild(option);
             });
@@ -3024,6 +3140,7 @@ if (langToggle && langMenu) {
                 editingPOI.details = poiDetailsInput.value.trim().split('\n').filter(d => d.trim());
                 editingPOI.iconSvg = selectedIconSvg;
                 editingPOI.iconId = selectedIconId;
+                editingPOI.iconColor = selectedIconColor;
                 editingPOI.image = selectedImage;
 
                 await db.collection('customPOIs').doc(editingPOI.id).set(editingPOI, { merge: true });
@@ -3045,13 +3162,23 @@ if (langToggle && langMenu) {
                     details: poiDetailsInput.value.trim().split('\n').filter(d => d.trim()),
                     iconSvg: selectedIconSvg,
                     iconId: selectedIconId,
+                    iconColor: selectedIconColor,
                     image: selectedImage,
-                    size: 28
+                    size: 140 // grande o suficiente para ser visivel no mapa 8192x6144
                 };
 
-                await db.collection('customPOIs').doc(poi.id).set(poi);
+                // Registrar e desenhar no mapa IMEDIATAMENTE, sem depender da
+                // resposta do Firestore. Assim o POI aparece na hora mesmo que
+                // a rede esteja lenta/offline; a persistencia acontece depois.
                 customPOIs.push(poi);
                 renderSinglePOI(poi);
+
+                try {
+                    await db.collection('customPOIs').doc(poi.id).set(poi);
+                } catch (netErr) {
+                    console.error('POI desenhado, mas falhou ao salvar no Firestore:', netErr);
+                    alert('O ponto foi criado no mapa, mas nao foi possivel salvar no servidor. Verifique a conexao.');
+                }
             }
             closePOIModal();
         } catch (err) {
@@ -3092,11 +3219,48 @@ if (langToggle && langMenu) {
         poiDeleteBtn.disabled = false;
     });
 
+    // Aplica uma cor ao SVG de um icone. Muitos icones (Iconify) definem
+    // fill/stroke direto nos <path> internos ou usam "currentColor", entao nao
+    // basta setar o fill no <svg> raiz. Aqui forcamos a cor tanto no raiz
+    // (via color, resolvendo currentColor) quanto em cada forma interna,
+    // respeitando se o icone e baseado em preenchimento ou em traco.
+    function applyIconColor(svgEl, color) {
+        if (!svgEl) return;
+        // Resolve "currentColor" para os icones que o utilizam.
+        svgEl.style.color = color;
+        const shapes = svgEl.querySelectorAll('path, circle, rect, polygon, polyline, line, ellipse');
+        const targets = shapes.length ? shapes : [svgEl];
+        targets.forEach(el => {
+            const fill = el.getAttribute('fill');
+            const stroke = el.getAttribute('stroke');
+            const isStrokeBased = (fill === 'none' || fill === null) && stroke && stroke !== 'none';
+            if (isStrokeBased) {
+                // Icone de contorno: recolorir o traco (deixa o fill como esta).
+                el.style.stroke = color;
+            } else {
+                // Icone preenchido: recolorir o fill (a menos que seja none).
+                if (fill !== 'none') el.style.fill = color;
+                if (stroke && stroke !== 'none') el.style.stroke = color;
+            }
+        });
+    }
+
     // Renderizar um POI no mapa
     function renderSinglePOI(poi) {
-        if (!svgDoc) return;
+        // Se o SVG ainda nao carregou, tentar de novo em breve (igual ao load).
+        if (!svgDoc || !svgDoc.querySelector('svg')) {
+            setTimeout(() => renderSinglePOI(poi), 300);
+            return;
+        }
         const svgEl = svgDoc.querySelector('svg');
-        const r = poi.size / 2;
+        // Evitar duplicar caso ja exista um grupo com esse id.
+        const existing = svgDoc.getElementById(poi.id);
+        if (existing) existing.remove();
+        // O mapa e enorme (viewBox 8192x6144), entao um marcador pequeno fica
+        // com poucos pixels e some. Garantir um tamanho minimo visivel, mesmo
+        // para POIs antigos salvos com size pequeno (ex.: 28).
+        const effectiveSize = Math.max(poi.size || 0, 120);
+        const r = effectiveSize / 2;
 
         const group = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
         group.setAttribute('id', poi.id);
@@ -3151,9 +3315,9 @@ if (langToggle && langMenu) {
             const iconDiv = document.createElement('div');
             iconDiv.style.cssText = 'width:100%;height:100%;display:flex;align-items:center;justify-content:center;';
             iconDiv.innerHTML = poi.iconSvg.replace(/width="[^"]*"/, 'width="' + ((r - 4) * 2 - 4) + '"').replace(/height="[^"]*"/, 'height="' + ((r - 4) * 2 - 4) + '"');
-            // Colorir o icone
+            // Colorir o icone com a cor escolhida (padrao dourado).
             const svgIcon = iconDiv.querySelector('svg');
-            if (svgIcon) svgIcon.style.fill = '#d4a843';
+            if (svgIcon) applyIconColor(svgIcon, poi.iconColor || '#d4a843');
             fo.appendChild(iconDiv);
             group.appendChild(fo);
         }
