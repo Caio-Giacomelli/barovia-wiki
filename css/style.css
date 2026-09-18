@@ -1497,6 +1497,88 @@ body {
     gap: 4px;
 }
 
+/* ===== Itens da party no editor de jornada ===== */
+.journey-party-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 8px;
+    background: rgba(107, 47, 47, 0.12);
+    border: 1px solid rgba(107, 47, 47, 0.35);
+    border-radius: 8px;
+}
+
+.journey-party-item .party-img-preview {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #6b2f2f;
+    flex-shrink: 0;
+}
+
+.journey-party-item .party-member-name {
+    flex: 1;
+    color: #ddd;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.journey-party-item .party-remove {
+    flex-shrink: 0;
+    cursor: pointer;
+    color: #944;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0 4px;
+    transition: color 0.15s ease;
+}
+
+.journey-party-item .party-remove:hover {
+    color: #f77;
+}
+
+/* ===== Dropdown de selecao de personagem ===== */
+.party-char-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 4px 0 8px;
+    max-height: 240px;
+    overflow-y: auto;
+    background: #1a1018;
+    border: 1px solid #6b2f2f;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.party-char-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #ddd;
+    font-size: 14px;
+    transition: background 0.15s ease;
+}
+
+.party-char-option:hover {
+    background: rgba(107, 47, 47, 0.35);
+}
+
+.party-char-option .party-char-option-img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #6b2f2f;
+    flex-shrink: 0;
+}
+
 /* Painel de edição de parada */
 .stop-edit-panel {
     display: none;
