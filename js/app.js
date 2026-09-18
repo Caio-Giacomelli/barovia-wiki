@@ -36,9 +36,23 @@ function overlayBaseRect() {
 // ===== ROTEAMENTO POR URL - MAPA PRINCIPAL OU CIDADE =====
 const urlParams = new URLSearchParams(window.location.search);
 const currentMapId = urlParams.get('map');
+// Identificador canonico do mapa ativo. No mapa principal usamos 'main';
+// em sub-mapas de cidade usamos o id da cidade (ex: 'vila-da-barovia').
+// As paradas de jornada guardam este id em stop.mapId para saber em qual
+// mapa devem ser desenhadas (cada SVG tem seu proprio sistema de coordenadas).
+const activeMapId = currentMapId || 'main';
 let activeCityIds = cityIds;
 let activeCities = cities;
 let isSubMap = false;
+
+// Nome amigavel de um mapa a partir do seu id (usado no editor de jornadas).
+function mapDisplayName(mapId) {
+    if (!mapId || mapId === 'main') return 'Mapa de Barovia';
+    if (typeof cityMaps !== 'undefined' && cityMaps[mapId] && cityMaps[mapId].displayName) {
+        return cityMaps[mapId].displayName;
+    }
+    return mapId;
+}
 
 if (currentMapId && typeof cityMaps !== 'undefined' && cityMaps[currentMapId]) {
     const cityMapData = cityMaps[currentMapId];
@@ -2114,6 +2128,21 @@ function showSessionPageInfo(index) {
     }
 }
 
+// Retorna o mapa "efetivo" de uma parada. Paradas antigas (sem mapId) sao
+// consideradas do mapa principal para manter compatibilidade.
+function stopMapId(stop) {
+    return (stop && stop.mapId) ? stop.mapId : 'main';
+}
+
+// Filtra as paradas de uma jornada que pertencem ao mapa atualmente ativo,
+// preservando o indice original de cada parada (usado para sessoes/participantes).
+function getStopsForActiveMap(config) {
+    if (!config || !config.stops) return [];
+    return config.stops
+        .map((stop, originalIndex) => ({ stop, originalIndex }))
+        .filter(({ stop }) => stopMapId(stop) === activeMapId);
+}
+
 function getOffsetStopsFor(stops) {
     const counts = {};
     return stops.map((stop) => {
@@ -2148,6 +2177,11 @@ trailBtn.addEventListener('click', () => {
 
 // Handle campaign change
 if (trailSeason) {
+    // Inicializar com o valor atual do dropdown para que "Editar Jornada"
+    // funcione mesmo que o usuario nunca troque a selecao manualmente.
+    if (!currentJourneyKey && trailSeason.value) {
+        currentJourneyKey = trailSeason.value;
+    }
     trailSeason.addEventListener('change', () => {
         currentJourneyKey = trailSeason.value;
     });
@@ -2220,7 +2254,12 @@ function showJourneyStop(stop, index) {
         }
     }
 
-    var html = '<div class="info-section"><h3>Parada ' + (index + 1) + ' de ' + config.stops.length + '</h3><p>' + linkifyLocations(stop.summary) + '</p>' + sessionBtn + '</div>';
+    // Numeracao relativa ao mapa ativo (posicao entre as paradas deste mapa).
+    const activeEntries = getStopsForActiveMap(config);
+    const activePos = activeEntries.findIndex(e => e.originalIndex === index);
+    const displayNum = activePos >= 0 ? activePos + 1 : index + 1;
+    const displayTotal = activeEntries.length > 0 ? activeEntries.length : config.stops.length;
+    var html = '<div class="info-section"><h3>Parada ' + displayNum + ' de ' + displayTotal + '</h3><p>' + linkifyLocations(stop.summary) + '</p>' + sessionBtn + '</div>';
     document.getElementById('city-info').innerHTML = html;
     infoPanel.classList.add('open');
 }
@@ -2333,6 +2372,8 @@ function drawJourneyBase() {
     const svgEl = svgDoc.querySelector('svg');
     const config = journeyConfigs[currentJourneyKey];
     if (!config || !config.stops || config.stops.length === 0) return;
+    // Nao desenhar se a jornada nao tem nenhuma parada neste mapa.
+    if (getStopsForActiveMap(config).length === 0) return;
 
     const trailGroup = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'g');
     trailGroup.setAttribute('id', `journey-trail-${currentJourneyKey}`);
@@ -2355,7 +2396,10 @@ function drawJourneyBase() {
 
     const partyChars = config.party || [];
 
-    const offsetStops = getOffsetStopsFor(config.stops);
+    // Apenas as paradas do mapa atualmente ativo. Preservamos os campos da
+    // parada e o indice original (via getStopsForActiveMap) para lookups.
+    const activeStops = getStopsForActiveMap(config).map(({ stop }) => stop);
+    const offsetStops = getOffsetStopsFor(activeStops);
     const firstStop = offsetStops[0];
 
     partyChars.forEach((char, i) => {
@@ -2412,13 +2456,18 @@ function drawJourneyBase() {
 function advanceJourney() {
     if (!svgDoc) return;
     const config = journeyConfigs[currentJourneyKey];
-    const offsetStops = getOffsetStopsFor(config.stops);
+    // Trabalhar apenas com as paradas do mapa ativo, mantendo o indice original
+    // de cada uma para resolver sessao/participantes em config.stops.
+    const activeEntries = getStopsForActiveMap(config);
+    const activeStops = activeEntries.map(e => e.stop);
+    const offsetStops = getOffsetStopsFor(activeStops);
     const trailGroup = activeJourneys[currentJourneyKey];
     if (!trailGroup) return;
     if (currentStopIndex >= offsetStops.length) { stopJourney(); return; }
 
     const thisIndex = currentStopIndex;
     const stop = offsetStops[thisIndex];
+    const originalIndex = activeEntries[thisIndex].originalIndex;
     const linesGroup = svgDoc.getElementById(`journey-lines-${currentJourneyKey}`);
     const stopsGroup = svgDoc.getElementById(`journey-stops-${currentJourneyKey}`);
 
@@ -2449,7 +2498,7 @@ function advanceJourney() {
 
         // Animate party icons along the path
         const allPartyChars = config.party || [];
-        const destStop = config.stops[thisIndex];
+        const destStop = activeStops[thisIndex];
         const destParticipants = destStop && destStop.participants && destStop.participants.length > 0 ? destStop.participants : null;
         const spacing = 36;
 
@@ -2496,8 +2545,8 @@ function advanceJourney() {
                 requestAnimationFrame(animatePartyMove);
             } else {
                 updatePartyVisibility(config, thisIndex);
-                placeStopMarker(stop, thisIndex, stopsGroup, config);
-                showJourneyStop(config.stops[thisIndex], thisIndex);
+                placeStopMarker(stop, originalIndex, stopsGroup, config);
+                showJourneyStop(activeStops[thisIndex], originalIndex);
                 if (journeyMode === 'auto' && currentStopIndex === thisIndex) {
                     journeyAnimation = setTimeout(() => { currentStopIndex++; advanceJourney(); }, 2500);
                 }
@@ -2508,8 +2557,8 @@ function advanceJourney() {
     } else {
         // Primeira parada: ajustar visibilidade dos membros
         updatePartyVisibility(config, 0);
-        placeStopMarker(stop, 0, stopsGroup, config);
-        showJourneyStop(config.stops[0], 0);
+        placeStopMarker(stop, originalIndex, stopsGroup, config);
+        showJourneyStop(activeStops[thisIndex], originalIndex);
         if (journeyMode === 'auto') {
             journeyAnimation = setTimeout(() => { currentStopIndex++; advanceJourney(); }, 2000);
         }
@@ -2519,9 +2568,11 @@ function advanceJourney() {
 // Mostrar/esconder membros da party baseado nos participantes da parada e reposicionar
 function updatePartyVisibility(config, stopIndex) {
     const partyChars = config.party || [];
-    const stop = config.stops[stopIndex];
+    // stopIndex e o indice DENTRO das paradas do mapa ativo.
+    const activeStops = getStopsForActiveMap(config).map(e => e.stop);
+    const stop = activeStops[stopIndex];
     const participants = stop && stop.participants ? stop.participants : null;
-    const offsetStops = getOffsetStopsFor(config.stops);
+    const offsetStops = getOffsetStopsFor(activeStops);
     const currentStop = offsetStops[stopIndex];
     const spacing = 36;
 
@@ -3958,9 +4009,25 @@ if (charsheetCloseBtn) {
 
     // Abrir modal para editar jornada atual
     if (trailEditBtn) trailEditBtn.addEventListener('click', () => {
-        const key = currentJourneyKey;
-        const config = journeyConfigs[key];
-        if (!config) return;
+        // Resolver a jornada a editar: usa a selecao atual e, como fallback,
+        // o valor atual do dropdown (que pode ter sido populado de forma
+        // assincrona pelo Firestore antes de o usuario mexer nele).
+        let key = currentJourneyKey || (trailSeason ? trailSeason.value : '');
+        let config = journeyConfigs[key];
+
+        // Se ainda nao ha config, tentar qualquer jornada carregada.
+        if (!config) {
+            const availableKeys = Object.keys(journeyConfigs);
+            if (availableKeys.length === 0) {
+                alert('Nenhuma jornada disponivel para editar. Crie uma nova jornada primeiro.');
+                return;
+            }
+            key = availableKeys[0];
+            config = journeyConfigs[key];
+        }
+
+        currentJourneyKey = key;
+        if (trailSeason && trailSeason.value !== key) trailSeason.value = key;
 
         editingJourneyKey = key;
         journeyModalTitle.textContent = 'Editar Jornada';
@@ -3983,6 +4050,7 @@ if (charsheetCloseBtn) {
             return {
                 x: s.x,
                 y: s.y,
+                mapId: s.mapId || 'main',
                 location: s.location || '',
                 session: s.session || '',
                 summary: s.summary || '',
@@ -4131,10 +4199,18 @@ if (charsheetCloseBtn) {
 
     // ===== STOPS LIST (compact: number + title + edit/delete) =====
     function renderStopsList() {
+        // Refletir no botao em qual mapa as novas paradas serao criadas.
+        if (!mapClickActive) {
+            journeyAddStop.textContent = '+ Adicionar parada em ' + mapDisplayName(activeMapId);
+        }
         journeyStopsList.innerHTML = '';
         journeyStops.forEach((stop, i) => {
+            const stopMap = stop.mapId || 'main';
+            const isOtherMap = stopMap !== activeMapId;
+
             const div = document.createElement('div');
             div.className = 'journey-stop-item';
+            if (isOtherMap) div.classList.add('stop-other-map');
 
             const num = document.createElement('span');
             num.className = 'stop-num';
@@ -4143,6 +4219,17 @@ if (charsheetCloseBtn) {
             const title = document.createElement('span');
             title.className = 'stop-title';
             title.textContent = stop.location || '(sem nome)';
+
+            // Badge indicando em qual mapa a parada esta (util quando a jornada
+            // tem paradas no mapa principal e em mapas internos de cidade).
+            const mapBadge = document.createElement('span');
+            mapBadge.className = 'stop-map-badge';
+            mapBadge.textContent = mapDisplayName(stopMap);
+            if (isOtherMap) {
+                mapBadge.classList.add('other-map');
+                mapBadge.title = 'Parada em outro mapa. Abra "' + mapDisplayName(stopMap) + '" para reposiciona-la.';
+            }
+            title.appendChild(mapBadge);
 
             const actions = document.createElement('span');
             actions.className = 'stop-actions';
@@ -4221,7 +4308,15 @@ if (charsheetCloseBtn) {
         stopEditLocation.value = stop.location || '';
         stopEditSubtitle.value = stop.subtitle || stop.session || '';
         stopEditDescription.value = stop.description || stop.summary || '';
-        stopEditCoordsDisplay.textContent = '(' + stop.x + ', ' + stop.y + ')';
+        const stopMap = stop.mapId || 'main';
+        stopEditCoordsDisplay.textContent = '(' + stop.x + ', ' + stop.y + ') \u2022 ' + mapDisplayName(stopMap);
+
+        // So e possivel reposicionar uma parada no mapa que esta carregado.
+        const sameMap = stopMap === activeMapId;
+        stopEditRelocate.disabled = !sameMap;
+        stopEditRelocate.title = sameMap
+            ? ''
+            : 'Abra o mapa "' + mapDisplayName(stopMap) + '" para reposicionar esta parada.';
 
         // Preencher dropdown de sessao com sessoes da mesma jornada
         stopEditSessionRef.innerHTML = '<option value="">(nenhuma)</option>';
@@ -4291,6 +4386,12 @@ if (charsheetCloseBtn) {
     // Reposicionar parada a partir do sub-modal
     stopEditRelocate.addEventListener('click', () => {
         if (editingStopIndex < 0) return;
+        const stop = journeyStops[editingStopIndex];
+        if ((stop.mapId || 'main') !== activeMapId) {
+            alert('Esta parada pertence ao mapa "' + mapDisplayName(stop.mapId || 'main') +
+                  '". Abra esse mapa para reposiciona-la.');
+            return;
+        }
         relocatingStopIndex = editingStopIndex;
         addingStop = false;
         saveStopEditToMemory();
@@ -4353,7 +4454,7 @@ if (charsheetCloseBtn) {
     }
 
     function exitMapClickMode() {
-        journeyAddStop.textContent = '+ Adicionar parada (clique no mapa)';
+        journeyAddStop.textContent = '+ Adicionar parada em ' + mapDisplayName(activeMapId);
         journeyAddStop.disabled = false;
         mapClickActive = false;
         // Restaurar o overlay
@@ -4381,7 +4482,7 @@ if (charsheetCloseBtn) {
     journeyAddStop.addEventListener('click', () => {
         addingStop = true;
         relocatingStopIndex = -1;
-        enterMapClickMode('Clique no mapa para adicionar parada...');
+        enterMapClickMode('Clique em ' + mapDisplayName(activeMapId) + ' para adicionar a parada...');
     });
 
     // Handler principal: click dentro do svgDoc
@@ -4445,6 +4546,7 @@ if (charsheetCloseBtn) {
             journeyStops.push({
                 x: svgX,
                 y: svgY,
+                mapId: activeMapId,
                 location: '',
                 subtitle: '',
                 session: '',
@@ -4482,6 +4584,7 @@ if (charsheetCloseBtn) {
         const stopsToSave = journeyStops.map(stop => ({
             x: stop.x,
             y: stop.y,
+            mapId: stop.mapId || 'main',
             location: stop.location || '',
             session: stop.session || stop.subtitle || '',
             summary: stop.summary || stop.description || '',

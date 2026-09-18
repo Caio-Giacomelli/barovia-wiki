@@ -1,0 +1,701 @@
+{
+  "_meta": {
+    "descricao": "Bundle de importacao da Wiki de Barovia (Curse of Strahd) montado a partir das sessoes S01-S10. Cada chave de nivel superior e uma colecao do Firestore. Cada objeto dentro dela representa um documento; a chave do objeto e o ID do documento.",
+    "convencao_de_ids": "Documentos criados pela wiki usam prefixo 'new_' para nao colidir com os documentos de indice numerico ja existentes (ex.: personagens dos jogadores). A colecao 'cities' usa IDs existentes do mapa e e mesclada (merge).",
+    "journeyKey": "barovia",
+    "geradoEm": "2026-09-18",
+    "sessoesCobertas": "S01 a S10"
+  },
+
+  "historicalNPCs": {
+    "new_gustavo_durst": {
+      "name": "Gustavo Durst",
+      "title": "Patriarca da Família Durst",
+      "description": "Antigo dono da Casa Durst (a Casa da Morte) na Vila da Baróvia. Líder de um culto dedicado a Strahd que operava no subterrâneo da residência. Sua devoção foi desprezada pelo próprio Strahd, como revelado em carta. Documentos encontrados na casa ligavam a família à residência e a um moinho de vento.",
+      "details": [
+        "Assinou, junto de Elisabeth Durst, o testamento que destinava os bens do casal às crianças Rosa e Cravo.",
+        "As escrituras mostravam que a família possuía a Casa Durst e um moinho de vento.",
+        "Recebeu uma carta de Strahd que demonstrava desprezo pela devoção do culto Durst.",
+        "O grupo assumiu que um dos ghasts derrotados no cômodo dos líderes cultistas era Gustavo Durst; Fael encontrou uma pulseira em seu corpo (S06).",
+        "Strahd comentou parte da história da família Durst ao grupo, do telhado, durante a fuga da casa (S08)."
+      ]
+    },
+    "new_elisabeth_durst": {
+      "name": "Elisabeth Durst",
+      "title": "Matriarca da Família Durst",
+      "description": "Esposa de Gustavo Durst e coautora do testamento da família. Mãe de Rosa e Cravo, as crianças que morreram trancadas no sótão da Casa da Morte.",
+      "details": [
+        "Assinou, com Gustavo Durst, o testamento que deixava os bens do casal para os filhos.",
+        "Ligada ao culto e aos horrores praticados sob a residência Durst."
+      ]
+    },
+    "new_rosa_durst": {
+      "name": "Rosa (Rosa Durst)",
+      "title": "Espírito da Casa da Morte",
+      "description": "Uma das crianças Durst. Junto do irmão Cravo, recebeu o grupo diante da Casa da Morte pedindo ajuda contra um 'monstro'. Rosa e Cravo eram, na verdade, espíritos de crianças que morreram de fome trancadas no quarto do sótão.",
+      "details": [
+        "Apresentou-se ao grupo na entrada da vila, pedindo ajuda contra um monstro na casa (S02).",
+        "Disse a Leena que havia um bebê no terceiro andar, o que guiou a exploração (S03).",
+        "Seus restos mortais e os de Cravo foram encontrados no quarto do sótão junto de uma maquete da casa (S04).",
+        "Possuiu Yoca, que passou a agir de forma infantil e tentou correr para enfrentar o monstro (S04).",
+        "Deixou o corpo de Yoca e encontrou descanso após o grupo sepultar seus ossos (S04)."
+      ]
+    },
+    "new_cravo_durst": {
+      "name": "Cravo (Thorn Durst)",
+      "title": "Espírito da Casa da Morte",
+      "description": "Uma das crianças Durst, irmão de Rosa. Espírito de uma criança que morreu de fome trancada no sótão da Casa da Morte.",
+      "details": [
+        "Junto de Rosa, recebeu o grupo na entrada da vila pedindo ajuda (S02).",
+        "Seus restos mortais foram encontrados no quarto do sótão (S04).",
+        "Encontrou descanso depois que o grupo enterrou seus ossos (S04)."
+      ]
+    },
+    "new_kolyan_indirovich": {
+      "name": "Kolyan Indirovich",
+      "title": "Burgomestre da Vila da Baróvia (falecido)",
+      "description": "Burgomestre da Vila da Baróvia e pai de Ismark e Irene. Assinou as cartas que trouxeram o grupo a Barovia. Faleceu antes da chegada dos aventureiros à mansão; seu enterro foi uma condição pedida por Irene antes de deixar a vila.",
+      "details": [
+        "Assinou a carta selada de pedido de ajuda entregue pelo mensageiro Vistani em Thalas'dar (S01).",
+        "Seu nome também assinava a segunda carta, encontrada em um cadáver na estrada, que advertia contra ajudar e falava da ameaça de um vampiro (S02).",
+        "O grupo descobriu que ele havia morrido ao conhecer Irene na mansão (S09).",
+        "Seu corpo foi enterrado pelo grupo na manhã da partida, cumprindo o pedido de Irene (S10)."
+      ]
+    },
+    "new_doru": {
+      "name": "Doru",
+      "title": "Filho do Padre Donavich (transformado)",
+      "description": "Filho do Padre Donavich. Retornou transformado em vampiro após uma tentativa de enfrentar Strahd e ficou preso no porão da igreja da vila. Declarou servir a Strahd.",
+      "details": [
+        "Sua história foi contada por Donavich ao grupo na igreja (S09).",
+        "Está preso no porão da igreja; o grupo não desceu até ele.",
+        "Fael usou a magia Mensagem para perguntar a quem ele servia; Doru respondeu que servia a Strahd (S09).",
+        "O grupo decidiu não intervir em sua situação (S09-S10)."
+      ]
+    },
+    "new_gertruda": {
+      "name": "Gertruda",
+      "title": "Filha desaparecida de Maria Louca",
+      "description": "Filha de Maria Louca, moradora da Vila da Baróvia. Está desaparecida. Uma pista associada a ela é uma boneca com referência à fabricação por Blinsky.",
+      "details": [
+        "Seu desaparecimento foi revelado quando o grupo conversou com Maria Louca durante a noite (S09).",
+        "Uma boneca de Maria Louca trazia referência a Blinsky, oferecendo pista para investigação.",
+        "Seu paradeiro permaneceu desconhecido ao fim da S10 (pendência em aberto)."
+      ]
+    }
+  },
+
+  "allies": {
+    "new_ismark_kolyanovich": {
+      "name": "Ismark Kolyanovich",
+      "title": "Ismark, o Menor — Vila da Baróvia",
+      "description": "Filho do falecido burgomestre Kolyan Indirovich e irmão de Irene. Pediu ajuda ao grupo na Taverna Sangue da Vinha e passou a acompanhá-los na tentativa de levar Irene para um lugar seguro.",
+      "details": [
+        "Encontrado na Taverna Sangue da Vinha; pediu ajuda e marcou conversa na mansão para o dia seguinte (S08).",
+        "Recebeu o grupo na Mansão do Burgomestre e apresentou Irene (S09).",
+        "Deixou a Vila da Baróvia com o grupo e Irene após o enterro do pai (S10)."
+      ]
+    },
+    "new_irene_kolyana": {
+      "name": "Irene Kolyana",
+      "title": "Filha do Burgomestre — Vila da Baróvia",
+      "description": "Filha de Kolyan Indirovich e irmã de Ismark. É alvo de Strahd, tendo sofrido mordidas. Motivo original do pedido de ajuda que trouxe o grupo a Barovia. Pediu que o corpo do pai fosse enterrado antes de deixar a vila.",
+      "details": [
+        "Mencionada como a pessoa ameaçada nas cartas de Kolyan Indirovich (S01-S02).",
+        "Conhecida pessoalmente na Mansão do Burgomestre; revelou as mordidas e a ameaça de Strahd (S09).",
+        "Condicionou sua partida ao enterro do pai, Kolyan Indirovich (S09).",
+        "Deixou a vila acompanhada do grupo e de Ismark; proteger Irene tornou-se o objetivo da viagem (S10)."
+      ]
+    },
+    "new_padre_donavich": {
+      "name": "Padre Donavich",
+      "title": "Sacerdote da Igreja da Vila",
+      "description": "Sacerdote da igreja da Vila da Baróvia e pai de Doru. Contou ao grupo a história do filho, transformado após tentar enfrentar Strahd e preso no porão da igreja.",
+      "details": [
+        "Conversou com parte do grupo na igreja e revelou a história de Doru (S09).",
+        "Seu filho, Doru, está preso no porão da igreja."
+      ]
+    },
+    "new_maria_louca": {
+      "name": "Maria Louca",
+      "title": "Moradora da Vila da Baróvia",
+      "description": "Mulher da Vila da Baróvia consumida pela dor do desaparecimento da filha, Gertruda. Guarda uma boneca com referência ao fabricante Blinsky.",
+      "details": [
+        "Conversou com o grupo durante a noite e revelou o desaparecimento da filha, Gertruda (S09).",
+        "Sua boneca traz uma referência a Blinsky, uma pista para a investigação."
+      ]
+    }
+  },
+
+  "villains": {
+    "new_strahd_von_zarovich": {
+      "name": "Strahd von Zarovich",
+      "title": "Senhor de Barovia",
+      "location": "Castelo Ravenloft",
+      "description": "O vampiro senhor de Barovia. Ameaça Irene Kolyana e domina a terra cercada pelas Brumas. Recebeu o grupo na entrada da vila e voltou a conversar com eles do telhado durante a fuga da Casa da Morte. Desprezava o culto e a devoção da família Durst.",
+      "details": [
+        "Um homem elegante de dentes pontudos recebeu o grupo na entrada da vila e desapareceu nas Brumas; reconhecido como vampiro (S02).",
+        "Escreveu uma carta a Gustavo Durst demonstrando desprezo pela devoção do culto (S04).",
+        "O culto da Casa da Morte mantinha um santuário dedicado a ele (S06).",
+        "Apareceu sobre um telhado após a fuga da Casa da Morte e comentou parte da história da família Durst (S08).",
+        "É alvo de ódio dos espíritos da Marcha dos Mortos e dos mortos-vivos da Ordem do Dragão Prateado (S08-S09).",
+        "Doru declarou servi-lo (S09)."
+      ]
+    },
+    "new_morgantha": {
+      "name": "Morgantha",
+      "title": "Vendedora de Pastéis",
+      "location": "Vila da Baróvia",
+      "description": "Uma vendedora de pastéis na Vila da Baróvia que tentava levar a criança Lucian. O grupo a impediu. Durante a conversa, revelou informações valiosas sobre Barovia, os Vistani e os inimigos de Strahd.",
+      "details": [
+        "Estava prestes a levar a criança Lucian quando o grupo interveio (S08).",
+        "Revelou que há Vistani que servem como espiões de Strahd.",
+        "Mencionou o acampamento Vistani junto ao Lago Tser.",
+        "Falou dos mortos-vivos da Ordem do Dragão Prateado, inimigos de Strahd, nas ruínas de Argynvostholt.",
+        "Indicou conhecimento proibido nas montanhas, acessível pela Passagem Tsolenka."
+      ]
+    },
+    "new_lorghoth": {
+      "name": "Lorghoth",
+      "title": "O Monstro das Profundezas (Shambling Mound)",
+      "location": "Câmara Ritual — Catacumbas da Casa Durst",
+      "description": "Enorme monstro de matéria vegetal (Shambling Mound) que dormia na grande câmara ritual sob a Casa da Morte. Despertou e atacou quando o grupo recusou oferecer um sacrifício às aparições do culto. Foi o 'monstro' mencionado por Rosa e Cravo.",
+      "details": [
+        "Despertou na câmara ritual das catacumbas depois que o grupo recusou o sacrifício exigido pelas aparições do culto (S07).",
+        "Foi derrotado pelo grupo sem que ninguém fosse sacrificado (S07).",
+        "Sua morte permitiu ao grupo iniciar a fuga da Casa da Morte (S08)."
+      ]
+    }
+  },
+
+  "artifacts": {
+    "new_caixa_prata_filigrana": {
+      "name": "Caixa de Prata com Filigrana de Ouro",
+      "description": "Caixa trabalhada em prata com filigrana de ouro, encontrada no quarto principal do terceiro andar da Casa da Morte. Recolhida por Leena (S03).",
+      "details": [
+        "Encontrada no quarto principal, junto de joias (S03).",
+        "Recolhida por Leena.",
+        "O grupo descansou no quarto principal onde ela foi achada (S05)."
+      ]
+    },
+    "new_aneis_ouro_quarto": {
+      "name": "Três Anéis de Ouro",
+      "description": "Três anéis de ouro encontrados no quarto principal da Casa da Morte, junto da caixa de prata e do colar de platina (S03).",
+      "details": [
+        "Achados no quarto principal do terceiro andar (S03)."
+      ]
+    },
+    "new_colar_platina_topazio": {
+      "name": "Colar de Platina com Pingente de Topázio",
+      "description": "Colar de platina com pingente de topázio encontrado no quarto principal da Casa da Morte. Recolhido por Yoca (S03).",
+      "details": [
+        "Achado no quarto principal, junto de anéis de ouro e da caixa de prata (S03).",
+        "Recolhido por Yoca."
+      ]
+    },
+    "new_pergaminho_bencao": {
+      "name": "Pergaminho de Bênção",
+      "description": "Pergaminho mágico encontrado no quarto secreto atrás da biblioteca da Casa da Morte. Ficou com Njoldvar (S04).",
+      "details": [
+        "Encontrado no aposento oculto atrás da biblioteca (S04).",
+        "Ficou com Njoldvar."
+      ]
+    },
+    "new_pergaminho_protecao_veneno": {
+      "name": "Pergaminho de Proteção contra Veneno",
+      "description": "Pergaminho mágico encontrado no quarto secreto da Casa da Morte. Ficou com Njoldvar (S04).",
+      "details": [
+        "Encontrado no aposento oculto atrás da biblioteca (S04).",
+        "Ficou com Njoldvar."
+      ]
+    },
+    "new_pergaminho_arma_espiritual": {
+      "name": "Pergaminho de Arma Espiritual",
+      "description": "Pergaminho mágico encontrado no quarto secreto da Casa da Morte. Ficou com Njoldvar (S04).",
+      "details": [
+        "Encontrado no aposento oculto atrás da biblioteca (S04).",
+        "Ficou com Njoldvar."
+      ]
+    },
+    "new_orbe_cristal_cinza": {
+      "name": "Orbe de Cristal Cinza Esfumaçado",
+      "description": "Orbe de cristal cinza esfumaçado retirado da estátua no santuário dedicado a Strahd, nas catacumbas da Casa Durst. Adotado por Seraphin como foco arcano (S06).",
+      "details": [
+        "Retirado da estátua no santuário do Senhor das Trevas (S06).",
+        "Passou a ser usado por Seraphin como foco arcano."
+      ]
+    },
+    "new_manto_protecao": {
+      "name": "Manto de Proteção",
+      "description": "Item mágico encontrado no baú do cômodo dos líderes cultistas, nas catacumbas da Casa Durst. Recolhido por Seraphin (S06).",
+      "details": [
+        "Achado no baú dos líderes do culto (S06).",
+        "Recolhido por Seraphin."
+      ]
+    },
+    "new_pulseira_gustavo": {
+      "name": "Pulseira de Gustavo Durst",
+      "description": "Pulseira encontrada por Fael no corpo de um dos ghasts do cômodo dos líderes cultistas, que o grupo assumiu ser Gustavo Durst (S06).",
+      "details": [
+        "Encontrada por Fael no corpo do ghast associado a Gustavo Durst (S06)."
+      ]
+    },
+    "new_camisa_malha": {
+      "name": "Camisa de Malha",
+      "description": "Armadura (camisa de malha) recolhida do baú dos líderes cultistas por Britta (S06).",
+      "details": [
+        "Achada no baú do cômodo dos líderes do culto (S06).",
+        "Recolhida por Britta."
+      ]
+    },
+    "new_pocoes_cura_durst": {
+      "name": "Poções de Cura (x4)",
+      "description": "Quatro poções de cura guardadas em um pequeno cofre de madeira, encontradas no baú dos líderes cultistas. Distribuídas para Fael, Britta, Leena e Yoca (S06).",
+      "details": [
+        "Guardadas em um pequeno cofre de madeira dentro do baú (S06).",
+        "Uma poção para cada: Fael, Britta, Leena e Yoca."
+      ]
+    },
+    "new_frasco_fogo_alquimico": {
+      "name": "Frasco de Fogo Alquímico",
+      "description": "Frasco de fogo alquímico recolhido do baú dos líderes cultistas por Yoca (S06).",
+      "details": [
+        "Achado no baú do cômodo dos líderes do culto (S06).",
+        "Recolhido por Yoca."
+      ]
+    },
+    "new_lanterna_focada": {
+      "name": "Lanterna Focada",
+      "description": "Lanterna focada encontrada no baú dos líderes cultistas, guardada entre os equipamentos do grupo (S06).",
+      "details": [
+        "Achada no baú do cômodo dos líderes do culto (S06)."
+      ]
+    },
+    "new_ferramentas_ladrao": {
+      "name": "Kit de Ferramentas de Ladrão",
+      "description": "Kit de ferramentas de ladrão encontrado no baú dos líderes cultistas (S06).",
+      "details": [
+        "Achado no baú do cômodo dos líderes do culto (S06)."
+      ]
+    },
+    "new_estojo_refeicao": {
+      "name": "Estojo de Refeição",
+      "description": "Estojo de refeição encontrado no baú dos líderes cultistas (S06).",
+      "details": [
+        "Achado no baú do cômodo dos líderes do culto (S06)."
+      ]
+    },
+    "new_anel_ouro_celas": {
+      "name": "Anel de Ouro (das Celas)",
+      "description": "Anel de ouro encontrado por Fael junto a um esqueleto nas celas das catacumbas da Casa Durst (S07).",
+      "details": [
+        "Achado junto a um esqueleto nas celas (S07).",
+        "Recolhido por Fael."
+      ]
+    },
+    "new_bolsa_pele_humana": {
+      "name": "Bolsa de Pele Humana (moedas)",
+      "description": "Bolsa feita de pele humana contendo 11 moedas de ouro e 60 moedas de prata, recolhida por Britta no poço e cômodos dos cultistas (S05).",
+      "details": [
+        "Continha 11 moedas de ouro e 60 moedas de prata (S05).",
+        "Recolhida por Britta no poço e cômodo dos cultistas."
+      ]
+    },
+    "new_agatas_musgo": {
+      "name": "Três Ágatas de Musgo e Pano Preto",
+      "description": "Três ágatas de musgo e um pano preto recolhidos por Yoca nos cômodos dos cultistas (S05).",
+      "details": [
+        "Achados no poço e cômodo dos cultistas (S05).",
+        "Recolhidos por Yoca."
+      ]
+    },
+    "new_tapa_olho_cornalina": {
+      "name": "Tapa-olho de Couro com Cornalina",
+      "description": "Tapa-olho de couro adornado com uma cornalina, recolhido por Yoca nos cômodos dos cultistas (S05).",
+      "details": [
+        "Achado no poço e cômodo dos cultistas (S05).",
+        "Recolhido por Yoca."
+      ]
+    },
+    "new_escova_marfim": {
+      "name": "Escova de Cabelo de Marfim",
+      "description": "Escova de cabelo de marfim com cerdas de prata, recolhida por Leena nos cômodos dos cultistas (S05).",
+      "details": [
+        "Achada no poço e cômodo dos cultistas (S05).",
+        "Recolhida por Leena."
+      ]
+    },
+    "new_capas_pretas_cartola": {
+      "name": "Capas Pretas e Cartola",
+      "description": "Capas pretas e uma cartola encontradas no armário de roupas próximo ao Hall Principal da Casa da Morte. Levadas por Fael (S03).",
+      "details": [
+        "Achadas no armário de roupas da sala com lareira, próximo ao Hall Principal (S03).",
+        "Levadas por Fael."
+      ]
+    },
+    "new_jarro_vinho": {
+      "name": "Jarro de Vinho",
+      "description": "Jarro de vinho obtido na Taverna Sangue da Vinha; ficou com Njoldvar (S08).",
+      "details": [
+        "Obtido na Taverna Sangue da Vinha (S08).",
+        "Ficou com Njoldvar."
+      ]
+    }
+  },
+
+  "books": {
+    "new_carta_pedido_ajuda": {
+      "name": "Carta Selada de Pedido de Ajuda",
+      "description": "Carta selada entregue pelo mensageiro Vistani na taverna de Thalas'dar, assinada por Kolyan Indirovich. Dizia que Irene Kolyana estava ameaçada por um mal terrível e oferecia recompensa a quem prestasse auxílio em Barovia (S01).",
+      "details": [
+        "Entregue pelo visitante Vistani em Thalas'dar (S01).",
+        "Assinada por Kolyan Indirovich, apresentado como burgomestre.",
+        "Orientava partir ao amanhecer pela estrada oeste, através da Floresta Svalich (~5 horas)."
+      ],
+      "fullText": "Assinada por Kolyan Indirovich, burgomestre. A mensagem convidava aventureiros a Barovia, afirmando que Irene Kolyana estava ameaçada por um mal terrível e oferecendo recompensa a quem prestasse auxílio. O mensageiro orientou seguir pela estrada oeste, atravessar a Floresta Svalich (cerca de cinco horas de viagem) e não cruzar a floresta durante a noite."
+    },
+    "new_carta_cadaver": {
+      "name": "Carta Encontrada no Cadáver",
+      "description": "Segunda mensagem, encontrada num cadáver humano na mata ao lado da estrada em Barovia. Também assinada por Kolyan Indirovich, mas de conteúdo oposto ao convite: advertia sobre a ameaça de um vampiro e pedia que abandonassem qualquer tentativa de ajuda, mantendo o mal contido naquela terra (S02).",
+      "details": [
+        "Encontrada num cadáver na Floresta Svalich, cujo dono nunca foi identificado (S02).",
+        "Assinada por Kolyan Indirovich.",
+        "Mencionava explicitamente a ameaça de um vampiro e a situação de Irene Kolyana.",
+        "Advertia os leitores a abandonar tentativas de ajuda e manter o mal contido."
+      ],
+      "fullText": "Segunda carta assinada por Kolyan Indirovich, de tom oposto ao convite recebido na taverna. Descrevia a ameaça de um vampiro e a situação de Irene Kolyana, advertindo os leitores a abandonar qualquer tentativa de ajuda e a manter o mal contido naquela terra."
+    },
+    "new_carta_strahd_gustavo": {
+      "name": "Carta de Strahd para Gustavo Durst",
+      "description": "Carta encontrada no quarto secreto da Casa da Morte, escrita por Strahd a Gustavo Durst, demonstrando seu desprezo pela devoção do culto da família Durst (S04).",
+      "details": [
+        "Achada no aposento oculto atrás da biblioteca (S04).",
+        "Mostrava o desprezo de Strahd pela devoção dos Durst."
+      ]
+    },
+    "new_escritura_casa_durst": {
+      "name": "Escritura da Casa Durst",
+      "description": "Documento encontrado no quarto secreto da Casa da Morte, comprovando a posse da residência pela família Durst (S04).",
+      "details": [
+        "Achada no aposento oculto atrás da biblioteca (S04).",
+        "Comprovava a posse da Casa Durst pela família."
+      ]
+    },
+    "new_escritura_moinho": {
+      "name": "Escritura do Moinho de Vento",
+      "description": "Documento encontrado no quarto secreto da Casa da Morte, ligando a família Durst à posse de um moinho de vento (S04).",
+      "details": [
+        "Achada no aposento oculto atrás da biblioteca (S04).",
+        "Ligava a família Durst a um moinho de vento."
+      ]
+    },
+    "new_testamento_durst": {
+      "name": "Testamento de Gustavo e Elisabeth Durst",
+      "description": "Testamento encontrado no quarto secreto da Casa da Morte, destinando os bens do casal Durst às crianças Rosa e Cravo (S04).",
+      "details": [
+        "Achado no aposento oculto atrás da biblioteca (S04).",
+        "Destinava os bens da família às crianças."
+      ]
+    },
+    "new_livros_capa_preta": {
+      "name": "Três Livros em Branco de Capa Preta",
+      "description": "Três livros em branco com capas de couro preto, recolhidos no quarto secreto da Casa da Morte (S04).",
+      "details": [
+        "Achados no aposento oculto atrás da biblioteca (S04).",
+        "Estavam em branco."
+      ]
+    },
+    "new_livro_magias_capa_amarela": {
+      "name": "Livro de Magias com Capa de Couro Amarelo",
+      "description": "Grimório de capa de couro amarelo encontrado no baú dos líderes cultistas, contendo diversas magias arcanas (S06).",
+      "details": [
+        "Achado no baú do cômodo dos líderes do culto (S06).",
+        "Contém: Armadura Arcana, Disfarçar-se, Identificar, Mísseis Mágicos, Proteção contra o Bem e o Mal, Arma Mágica, Imobilizar Pessoas, Invisibilidade e Visão no Escuro."
+      ],
+      "fullText": "Grimório de capa de couro amarelo. Magias contidas: Armadura Arcana, Disfarçar-se, Identificar, Mísseis Mágicos, Proteção contra o Bem e o Mal, Arma Mágica, Imobilizar Pessoas, Invisibilidade e Visão no Escuro."
+    },
+    "new_mapa_cidade": {
+      "name": "Mapa da Cidade",
+      "description": "Mapa da Vila da Baróvia comprado no Empório de Bildrath (S08).",
+      "details": [
+        "Comprado no Empório de Bildrath (S08)."
+      ]
+    },
+    "new_hinos_da_alvorada": {
+      "name": "Hinos da Alvorada",
+      "description": "Livro obtido por Seraphin durante a visita à igreja da Vila da Baróvia (S10).",
+      "details": [
+        "Obtido por Seraphin na igreja da vila (S10)."
+      ]
+    },
+    "new_divindades_ritos_sagrados": {
+      "name": "Divindades e Ritos Sagrados",
+      "description": "Livro que ficou com Njoldvar; listado entre os itens encontrados na S10.",
+      "details": [
+        "Ficou com Njoldvar (S10)."
+      ]
+    }
+  },
+
+  "landmarks": {
+    "new_culto_casa_durst": {
+      "name": "O Culto da Casa Durst",
+      "description": "Culto dedicado a Strahd que operava no subterrâneo da Casa da Morte, liderado pela família Durst. Deixou criptas, alojamentos, um santuário, um relicário, celas e uma grande câmara ritual sob a residência. As crianças Rosa e Cravo morreram trancadas no sótão da casa.",
+      "details": [
+        "Operava nas catacumbas sob a Casa Durst, na Vila da Baróvia.",
+        "Mantinha um santuário dedicado a Strahd (S06).",
+        "As aparições do culto exigiam o sacrifício de uma vida na câmara ritual (S07).",
+        "Gustavo Durst era ligado à liderança do culto; Strahd desprezava sua devoção (S04, S06)."
+      ]
+    },
+    "new_morte_criancas_durst": {
+      "name": "A Morte das Crianças Durst",
+      "description": "Rosa e Cravo, filhos dos Durst, foram deixados trancados no quarto do sótão da Casa da Morte e morreram de fome. Seus espíritos permaneceram na casa até serem sepultados pelo grupo.",
+      "details": [
+        "As crianças morreram de fome trancadas no sótão (S04).",
+        "Seus espíritos pediam ajuda e provocaram os eventos da Casa da Morte.",
+        "Encontraram descanso após o grupo enterrar seus ossos (S04)."
+      ]
+    },
+    "new_marcha_dos_mortos": {
+      "name": "A Marcha dos Mortos",
+      "description": "Procissão de espíritos que atravessa a Vila da Baróvia durante a madrugada e segue pela estrada rumo à floresta. Os espíritos nutrem ódio por Strahd.",
+      "details": [
+        "Presenciada pelo grupo durante a madrugada na Vila da Baróvia (S09).",
+        "Yoca acompanhou a procissão por cerca de meia hora e desistiu ao ver que seguiam cada vez mais fundo na floresta.",
+        "Magias revelaram que os espíritos odeiam Strahd.",
+        "O destino final da procissão não foi alcançado (pendência)."
+      ]
+    },
+    "new_ordem_dragao_prateado": {
+      "name": "Ordem do Dragão Prateado",
+      "description": "Ordem cujos mortos-vivos são inimigos de Strahd e habitam as ruínas de Argynvostholt. Mencionada por Morgantha como oposição a Strahd.",
+      "details": [
+        "Citada por Morgantha durante a conversa na vila (S08).",
+        "Seus mortos-vivos habitam as ruínas de Argynvostholt.",
+        "São inimigos de Strahd."
+      ]
+    }
+  },
+
+  "wikiSessionsFS": {
+    "s01": {
+      "id": "s01",
+      "journeyKey": "barovia",
+      "title": "Sessão 01 — Convite para Baróvia",
+      "quote": "",
+      "quoteAuthor": "",
+      "content": "A jornada começou em Thalas'dar, cidade onde Leena e Fael residiam. Os seis aventureiros chegaram à taverna por caminhos diferentes e começaram a se conhecer. Os irmãos já compartilhavam uma história anterior, mas os demais ainda estavam formando seus primeiros vínculos.\n\nAntes da reunião, Leena havia se separado de Sir Charles, com quem estivera viajando. Seraphin ajudou uma criança em um beco, enquanto Yoca chegou à cidade numa carroça acompanhado do senhor Bing. Os anões Balmor e Bilgrim também foram mencionados durante as apresentações, seguindo para a taverna central.\n\nNa taverna, um visitante Vistani, vestido com roupas coloridas, aproximou-se trazendo uma mensagem de seu mestre. Ele entregou uma carta selada, assinada por Kolyan Indirovich, apresentado como burgomestre. A mensagem dizia que Irene Kolyana estava ameaçada por um mal terrível e oferecia uma recompensa a quem prestasse auxílio em Baróvia.\n\nO mensageiro orientou o grupo a partir ao amanhecer, seguir pela estrada oeste e atravessar a Floresta Svalich. Indicou aproximadamente cinco horas de viagem e advertiu contra atravessar a floresta durante a noite.\n\nDepois de entregar a mensagem, o visitante pagou uma rodada de bebidas para a taverna e foi embora. Os aventureiros discutiram a proposta, decidiram viajar juntos e combinaram um encontro na manhã seguinte.\n\n— Encerramento —\nA sessão terminou com o grupo formado na taverna de Thalas'dar, decidido a partir junto ao amanhecer."
+    },
+    "s02": {
+      "id": "s02",
+      "journeyKey": "barovia",
+      "title": "Sessão 02 — Entrada em Baróvia",
+      "quote": "",
+      "quoteAuthor": "",
+      "content": "Na manhã seguinte, os aventureiros se reuniram em Thalas'dar e partiram pela estrada indicada pelo visitante Vistani. Seguiram juntos em direção à Floresta Svalich, atendendo ao pedido de ajuda recebido na taverna.\n\nApós aproximadamente cinco horas de viagem, chegaram aos Portões de Baróvia. Altos contrafortes de pedra cinzenta sustentavam enormes portões de ferro, ladeados por estátuas de guardiões armados. As cabeças das estátuas estavam caídas entre as ervas aos seus pés.\n\nOs portões se abriram sozinhos quando o grupo se aproximou e se fecharam depois que todos atravessaram. Dentro de Baróvia, algumas magias também apresentaram alterações em sua aparência visual.\n\nContinuando pela estrada, Yoca percebeu um odor vindo da mata. O grupo investigou e encontrou um cadáver humano entre a vegetação. Recolheram uma carta que o morto carregava, sem descobrir sua identidade. A segunda mensagem também estava assinada por Kolyan Indirovich, mas contrastava com o convite: descrevia a ameaça de um vampiro e a situação de Irene Kolyana, advertindo os leitores a abandonar qualquer tentativa de ajuda e manter o mal contido.\n\nUivos de lobos interromperam a investigação. Os aventureiros voltaram à estrada e seguiram viagem, sem enfrentar os animais. Mais adiante, a floresta deu lugar a um campo aberto, de onde puderam avistar a Vila da Baróvia.\n\nNa entrada da vila, um homem elegante os recebeu e lhes deu as boas-vindas. Seus dentes pontudos fizeram o grupo reconhecê-lo como um vampiro, mas sua identidade ainda era desconhecida. Depois do breve encontro, ele desapareceu nas Brumas.\n\nNa vila, os aventureiros encontraram Rosa e Cravo diante de uma residência. As crianças falaram de um monstro dentro da casa e pediram ajuda. O grupo aceitou investigar o local.\n\n— Encerramento —\nA sessão terminou com o grupo diante da residência de Rosa e Cravo, preparando-se para investigar. A exploração da Casa da Morte ficou para a sessão seguinte."
+    },
+    "s03": {
+      "id": "s03",
+      "journeyKey": "barovia",
+      "title": "Sessão 03 — Casa da Morte I",
+      "quote": "",
+      "quoteAuthor": "",
+      "content": "O grupo entrou na Casa da Morte para investigar o monstro mencionado por Rosa e Cravo. Inicialmente, Leena permaneceu do lado de fora com as crianças, enquanto os demais exploraram os primeiros aposentos. O interior parecia limpo e preservado, apesar da aparência abandonada da residência.\n\nNo armário de roupas próximo ao Hall Principal, na sala com a lareira, Fael encontrou capas pretas e uma cartola, levando roupas consigo. O armário trancado do Covil dos Lobos não foi aberto.\n\nAs crianças disseram a Leena que havia um bebê no terceiro andar. Ela entrou correndo para tentar salvá-lo, e a busca passou a orientar a exploração. Britta e Seraphin ainda investigaram a cozinha e a despensa. Os personagens comeram parte dos alimentos, consideraram que não estavam ruins, mas não levaram comida para a viagem.\n\nNa primeira passagem pelo segundo andar, Yoca entrou na Biblioteca para verificar se havia algo que chamasse sua atenção. Também examinou o Conservatório, mas não encontrou nada relevante nesses aposentos. Durante a exploração, Yoca acendeu todas as lareiras, imaginando que isso pudesse fazer parte de algum enigma da casa.\n\nNo terceiro andar, Fael aproximou-se de uma armadura que ganhou vida e o atacou: uma Animated Armor. Os aventureiros venceram o confronto e continuaram procurando o bebê. No quarto principal, encontraram uma caixa de prata com filigrana de ouro, três anéis de ouro e um colar de platina com pingente de topázio.\n\nAinda durante a busca, Fael encontrou uma Broom of Animated Attack que atacou o grupo. Os personagens fecharam a porta, deixando a vassoura presa no aposento, e prosseguiram.\n\nAo chegarem ao berçário, perceberam que não havia um bebê no berço, apenas um lençol enrolado. Um Specter com a aparência de uma mulher os atacou nas proximidades, dando início a outro combate. O grupo venceu sem descobrir quem ela havia sido em vida.\n\n— Confrontos —\nAnimated Armor (derrotada); Broom of Animated Attack (contida ao fechar a porta); Specter junto ao berçário (derrotado).\n\n— Encerramento —\nA sessão terminou após a vitória contra o Specter do berçário, com o grupo ainda nos andares superiores da Casa da Morte."
+    },
+    "s04": {
+      "id": "s04",
+      "journeyKey": "barovia",
+      "title": "Sessão 04 — Casa da Morte II",
+      "quote": "",
+      "quoteAuthor": "",
+      "content": "Prosseguindo pelos andares superiores da Casa da Morte, o grupo encontrou uma passagem secreta que levava ao sótão. Essa foi a única passagem secreta que os aventureiros localizaram diretamente, sem auxílio da maquete.\n\nNo sótão, conseguiram abrir o quarto das crianças. Ali encontraram os restos mortais de Rosa e Cravo, seus espíritos e uma maquete da residência. A reprodução revelou todas as passagens secretas da casa, incluindo o aposento oculto da biblioteca e o caminho para as profundezas do subterrâneo.\n\nNa conversa, os espíritos explicaram que haviam sido deixados trancados no quarto e morrido de fome. Rosa possuiu Yoca, que passou a se comportar de maneira infantil e quis correr para enfrentar o monstro mencionado pelas crianças.\n\nO grupo se dividiu depois dessa descoberta. Britta, Fael e Leena desceram para levar os ossos para fora e enterrá-los. Yoca, Njoldvar e Seraphin ficaram inicialmente na parte superior, mas Yoca, ainda possuído, avançou pelo acesso ao subterrâneo já revelado pela maquete. Njoldvar e Seraphin foram atrás dele, e Njoldvar conseguiu segurá-lo antes que corresse sozinho para as profundezas.\n\nDo lado de fora, Britta entrou nas Brumas durante a tentativa de sepultamento e sofreu uma forte exaustão. Para concluir o trabalho sem expor novamente alguém às Brumas, Fael utilizou Mãos Mágicas para cavar e enterrar os ossos. Depois do sepultamento, Rosa deixou o corpo de Yoca, e os espíritos das crianças encontraram descanso.\n\nCom os acessos secretos conhecidos, os personagens também investigaram o aposento oculto atrás da biblioteca. Encontraram um esqueleto atingido por dardos junto a um baú, documentos da família Durst, pergaminhos e livros. Recolheram os itens do aposento, mas deixaram a armadura do morto. A carta de Strahd mostrava seu desprezo pela devoção dos Durst. As escrituras revelaram que a família possuía a residência e um moinho de vento, enquanto o testamento destinava os bens às crianças.\n\n— Encerramento —\nA sessão terminou após a exploração do sótão, o sepultamento das crianças e a reunião do grupo. Exausta pelas Brumas, Britta precisava descansar antes de continuar."
+    },
+    "s05": {
+      "id": "s05",
+      "journeyKey": "barovia",
+      "title": "Sessão 05 — As Catacumbas da Casa Durst",
+      "quote": "",
+      "quoteAuthor": "",
+      "content": "Depois do sepultamento de Rosa e Cravo, o grupo precisava se recuperar, sobretudo por causa da exaustão de Britta. Os personagens fizeram um descanso longo no quarto principal, onde haviam encontrado a caixa de prata com filigrana de ouro.\n\nApós o descanso, retomaram a exploração e desceram ao subterrâneo da Casa da Morte. O acesso já era conhecido graças à maquete examinada no quarto das crianças.\n\nNas catacumbas, encontraram criptas, alojamentos e outros vestígios de um culto que havia funcionado sob a residência. A exploração deixou claro que o perigo da casa se estendia muito além dos aposentos superiores.\n\nNo poço e nos cômodos dos cultistas, vasculharam os baús e recolheram moedas, pedras e objetos pessoais. Yoca tentou abrir um dos baús trancados, não conseguiu e seguiu para os próximos, sem recuperar seu conteúdo.\n\nDurante a exploração do subterrâneo, Yoca caiu numa armadilha. O grupo também enfrentou um grick e os ghouls que surgiram nos túneis, vencendo os confrontos e prosseguindo pelas catacumbas.\n\n— Confrontos —\nGrick (derrotado); ghouls (derrotados); Yoca caiu numa armadilha.\n\n— Itens —\nBolsa de pele humana com 11 mo. de ouro e 60 mo. de prata (Britta); três ágatas de musgo e um pano preto (Yoca); tapa-olho de couro com cornalina (Yoca); escova de cabelo de marfim com cerdas de prata (Leena).\n\n— Encerramento —\nA sessão terminou com o grupo ainda nas catacumbas, depois de investigar os alojamentos e vencer os confrontos contra o grick e os ghouls."
+    },
+    "s06": {
+      "id": "s06",
+      "journeyKey": "barovia",
+      "title": "Sessão 06 — Os Líderes do Culto",
+      "quote": "",
+      "quoteAuthor": "",
+      "content": "Depois dos confrontos contra o grick e os ghouls, o grupo continuou a exploração das catacumbas da Casa da Morte, avançando para o santuário e os aposentos dos líderes do culto.\n\nNo santuário dedicado a Strahd, Seraphin retirou o orbe de cristal cinza esfumaçado da estátua e deixou o local, passando a utilizá-lo como foco arcano.\n\nProsseguindo até o cômodo dos líderes do culto, os aventureiros enfrentaram dois ghasts que os atacaram junto ao baú. Depois da vitória, Fael encontrou uma pulseira no corpo de um deles, que o grupo assumiu ser Gustavo Durst. Os personagens também recolheram todos os equipamentos e itens mágicos do baú.\n\nEntre os achados estavam um Manto de Proteção, uma camisa de malha, quatro poções de cura, um frasco de fogo alquímico, uma lanterna focada, ferramentas de ladrão, um estojo de refeição e um livro de magias. O equipamento ampliou os recursos do grupo para continuar a exploração.\n\n— Confrontos —\nDois ghasts no cômodo dos líderes cultistas (derrotados).\n\n— Livro de magias (capa de couro amarelo) —\nArmadura Arcana, Disfarçar-se, Identificar, Mísseis Mágicos, Proteção contra o Bem e o Mal, Arma Mágica, Imobilizar Pessoas, Invisibilidade e Visão no Escuro.\n\n— Encerramento —\nA sessão terminou depois da vitória contra os dois ghasts dos aposentos dos líderes e do recolhimento de todos os itens do baú, com o grupo ainda nas catacumbas."
+    },
+    "s07": {
+      "id": "s07",
+      "journeyKey": "barovia",
+      "title": "Sessão 07 — O Monstro das Profundezas",
+      "quote": "",
+      "quoteAuthor": "",
+      "content": "Depois de explorar os aposentos dos líderes, o grupo avançou para os últimos setores das catacumbas da Casa da Morte. Passou por antigos espaços de ritual, um relicário e celas que completavam o cenário de horrores sob a residência.\n\nNas celas, Fael encontrou um anel de ouro junto a um esqueleto e o recolheu.\n\nAo alcançar a grande câmara ritual, os personagens se viram cercados pelas aparições dos cultistas. As figuras exigiram o sacrifício de uma vida, mas os aventureiros recusaram a oferenda.\n\nNa câmara, Lorghoth, um enorme Shambling Mound, despertou e atacou. O grupo enfrentou o monstro de matéria vegetal e conseguiu derrotá-lo sem oferecer uma vítima ao culto.\n\n— Confrontos —\nLorghoth, o Shambling Mound da câmara ritual (derrotado).\n\n— Encerramento —\nA sessão terminou com a vitória sobre Lorghoth, ainda dentro da câmara ritual. O grupo precisava encontrar o caminho de volta e sair da Casa da Morte."
+    },
+    "s08": {
+      "id": "s08",
+      "journeyKey": "barovia",
+      "title": "Sessão 08 — Fuga da Casa e Abrigo na Vila",
+      "quote": "",
+      "quoteAuthor": "",
+      "content": "Depois da vitória sobre Lorghoth, os personagens tentaram deixar a Casa da Morte, mas a própria residência passou a ameaçá-los. Armadilhas e fumaça dificultaram a saída. As lareiras acesas anteriormente por Yoca tiveram impacto nessa fuga. O grupo conseguiu atravessar a casa e escapar com vida.\n\nDo lado de fora, encontrou Strahd sobre um telhado. Ele conversou com os aventureiros e comentou parte da história da família Durst.\n\nJá na Vila da Baróvia, os aventureiros encontraram Morgantha, uma vendedora de pastéis. Ela estava prestes a levar a criança Lucian, mas o grupo impediu que isso acontecesse. Durante a conversa, Morgantha revelou informações sobre os Vistani, inimigos de Strahd e um lugar associado a conhecimento proibido nas montanhas.\n\nOs aventureiros também passaram pelo Empório de Bildrath, onde compraram um mapa da cidade. Depois, foram à Taverna Sangue da Vinha. Ali conversaram com Ismark, que pediu ajuda e combinou uma conversa na mansão para o dia seguinte. Os personagens beberam vinho, falaram com o taverneiro e conseguiram abrigo para dormir.\n\n— Revelações de Morgantha —\nHá Vistani que servem como espiões de Strahd; existe um acampamento Vistani junto ao Lago Tser; Strahd tem inimigos mortos-vivos da Ordem do Dragão Prateado, nas ruínas de Argynvostholt; há conhecimento proibido nas montanhas, acessível pela Passagem Tsolenka.\n\n— Encerramento —\nA sessão terminou na taverna, depois da fuga e dos encontros na vila. O grupo foi dormir, deixando a conversa na mansão para a manhã seguinte."
+    },
+    "s09": {
+      "id": "s09",
+      "journeyKey": "barovia",
+      "title": "Sessão 09 — Irene e a Marcha dos Mortos",
+      "quote": "",
+      "quoteAuthor": "",
+      "content": "Na manhã seguinte, o grupo foi à Mansão do Burgomestre, conforme combinado com Ismark. Ali conheceu Irene e descobriu que seu pai, Kolyan Indirovich, havia morrido. Também soube das mordidas sofridas por Irene e da ameaça de Strahd. Antes de deixar a vila, ela queria que o corpo do pai fosse enterrado.\n\nO grupo se dividiu: Britta permaneceu na mansão junto de Ismark e Irene, enquanto os demais foram à igreja da vila e conversaram com Donavich. Descobriram a história de Doru, seu filho, que havia retornado transformado após uma tentativa de enfrentar Strahd e estava preso no porão. Os personagens não desceram ao porão. Fael utilizou Mensagem para perguntar a Doru a quem ele servia. Doru respondeu que servia a Strahd, e o grupo decidiu não intervir.\n\nOs aventureiros voltaram à mansão e mantiveram o plano de realizar o enterro pela manhã, antes da partida. Durante o tempo restante na vila, retornaram à taverna e conversaram com as mulheres Vistani que estavam ali. Fael flertou com uma delas, que sugeriu um encontro durante uma noite caso ele fosse ao acampamento do Lago Tser.\n\nDurante a madrugada, o grupo presenciou a Marcha dos Mortos, uma procissão de espíritos que deixava a vila pela estrada. Yoca tentou acompanhá-los e caminhou por aproximadamente meia hora fora da vila, mas desistiu quando percebeu que seguiam cada vez mais fundo pela floresta. Os demais personagens acordados também tentaram investigar a procissão, interagir com os espíritos e utilizar magias para compreender suas mentes. Perceberam que os espíritos nutriam ódio por Strahd.\n\nDurante a noite, o grupo também conversou com Maria Louca e descobriu o desaparecimento de sua filha, Gertruda. Uma boneca trazia uma referência à fabricação por Blinsky, oferecendo uma pista para investigação. Depois das investigações noturnas, o grupo voltou a dormir.\n\n— Encerramento —\nA sessão terminou após as conversas na vila e a investigação da Marcha dos Mortos. Os personagens foram dormir, com o enterro e a partida previstos para a manhã seguinte."
+    },
+    "s10": {
+      "id": "s10",
+      "journeyKey": "barovia",
+      "title": "Sessão 10 — A Saída da Vila da Baróvia",
+      "quote": "",
+      "quoteAuthor": "",
+      "content": "Depois da noite em que presenciaram a Marcha dos Mortos, os aventureiros se prepararam para deixar a Vila da Baróvia com Irene e Ismark.\n\nPela manhã, o grupo ajudou no enterro de Kolyan Indirovich, cumprindo o pedido de Irene antes da partida.\n\nDurante a visita à igreja, Seraphin obteve o livro Hinos da Alvorada.\n\nCom Irene e Ismark, os personagens deixaram a vila e retomaram a estrada. A viagem passou a ter como objetivo proteger Irene e procurar um lugar mais seguro para ela.\n\nNo trajeto, o grupo encontrou lobos na estrada e precisou lidar com mais uma ameaça durante a viagem.\n\n— Confrontos —\nEncontro com lobos (Wolves) na estrada.\n\n— Itens —\nLivro Hinos da Alvorada (Seraphin); Livro de Divindades e Ritos Sagrados (Njoldvar).\n\n— Encerramento —\nA sessão terminou na estrada, com o grupo diante dos lobos e acompanhado por Irene e Ismark."
+    }
+  },
+
+  "cities": {
+    "vila-da-barovia": {
+      "description": "Vila sombria a leste de Barovia, primeiro grande destino do grupo. Foi ali que os aventureiros enfrentaram a Casa da Morte, conheceram Ismark e Irene, impediram Morgantha de levar a criança Lucian e presenciaram a Marcha dos Mortos.",
+      "notes": "Interações do grupo (S02-S10): recepcionados por Strahd na entrada; investigaram a Casa da Morte a pedido de Rosa e Cravo; impediram Morgantha de levar Lucian; compraram um mapa no Empório de Bildrath; conversaram com Ismark na Taverna Sangue da Vinha; conheceram Irene na mansão e souberam da morte de Kolyan Indirovich; ouviram de Donavich a história de Doru (preso no porão da igreja); conversaram com Maria Louca sobre o sumiço de Gertruda; presenciaram a Marcha dos Mortos; enterraram Kolyan Indirovich e deixaram a vila com Irene e Ismark."
+    }
+  },
+
+  "customPOIs": {
+    "_comentario": "POIs sugeridos para locais citados nas sessões que ainda não têm ponto no mapa. Ajuste os campos x/y (coordenadas no SVG) e o id antes de importar. O app carrega customPOIs em quests.js (campos usados: id, name). Os demais campos ficam disponíveis para uso futuro.",
+    "new_poi_thalasdar": {
+      "id": "thalas-dar",
+      "name": "Thalas'dar",
+      "region": "Fora de Barovia (origem do grupo)",
+      "description": "Cidade de onde partiu o grupo, terra natal de Leena e Fael. Ponto de encontro na taverna onde receberam o convite de Kolyan Indirovich por meio de um mensageiro Vistani (S01).",
+      "x": 0,
+      "y": 0
+    },
+    "new_poi_floresta_svalich": {
+      "id": "floresta-svalich",
+      "name": "Floresta Svalich",
+      "region": "Estrada de entrada em Barovia",
+      "description": "Floresta atravessada pela estrada oeste rumo a Barovia. No caminho, o grupo achou um cadáver com a segunda carta de Kolyan Indirovich e ouviu uivos de lobos (S02).",
+      "x": 0,
+      "y": 0
+    },
+    "new_poi_portoes_barovia": {
+      "id": "portoes-barovia",
+      "name": "Portões de Baróvia",
+      "region": "Entrada de Barovia",
+      "description": "Grandes portões de ferro com estátuas de guardiões decapitados. Abriram e fecharam sozinhos à passagem do grupo (S02).",
+      "x": 0,
+      "y": 0
+    }
+  },
+
+  "quests": {
+    "_comentario": "Demandas (quests). status: 'active' (em aberto) ou 'completed' (concluída). giver e locationId/locationType são opcionais. locationType: 'city' (usa IDs de cities) ou 'poi' (usa IDs de customPOIs).",
+    "new_quest_convite_barovia": {
+      "journeyKey": "barovia",
+      "title": "Atender ao pedido de auxílio em Baróvia",
+      "desc": "Viajar de Thalas'dar a Barovia pela Floresta Svalich para ajudar contra o mal que ameaça Irene Kolyana, conforme a carta do burgomestre.",
+      "giver": "Kolyan Indirovich",
+      "locationType": "city",
+      "locationId": "vila-da-barovia",
+      "status": "completed"
+    },
+    "new_quest_casa_da_morte": {
+      "journeyKey": "barovia",
+      "title": "Investigar o monstro da Casa da Morte",
+      "desc": "Rosa e Cravo pediram ajuda contra um monstro em sua casa. O grupo explorou a Casa Durst, os andares superiores e as catacumbas, e derrotou Lorghoth na câmara ritual.",
+      "giver": "Rosa (Rosa Durst)",
+      "locationType": "city",
+      "locationId": "vila-da-barovia",
+      "status": "completed"
+    },
+    "new_quest_sepultar_criancas": {
+      "journeyKey": "barovia",
+      "title": "Sepultar Rosa e Cravo",
+      "desc": "Enterrar os ossos das crianças Durst para libertar seus espíritos. Concluída na S04; os espíritos encontraram descanso.",
+      "giver": "Rosa (Rosa Durst)",
+      "locationType": "city",
+      "locationId": "vila-da-barovia",
+      "status": "completed"
+    },
+    "new_quest_salvar_lucian": {
+      "journeyKey": "barovia",
+      "title": "Impedir que Morgantha leve Lucian",
+      "desc": "Na vila, o grupo impediu Morgantha de levar a criança Lucian (S08).",
+      "giver": "",
+      "locationType": "city",
+      "locationId": "vila-da-barovia",
+      "status": "completed"
+    },
+    "new_quest_enterrar_kolyan": {
+      "journeyKey": "barovia",
+      "title": "Enterrar Kolyan Indirovich",
+      "desc": "Irene pediu que o corpo de seu pai fosse enterrado antes da partida. Realizado na manhã da saída da vila (S10).",
+      "giver": "Irene Kolyana",
+      "locationType": "city",
+      "locationId": "vila-da-barovia",
+      "status": "completed"
+    },
+    "new_quest_proteger_irene": {
+      "journeyKey": "barovia",
+      "title": "Proteger Irene e levá-la a um lugar seguro",
+      "desc": "Após deixar a vila com Irene e Ismark, o objetivo passou a ser protegê-la de Strahd e encontrar um refúgio seguro.",
+      "giver": "Ismark Kolyanovich",
+      "locationType": "city",
+      "locationId": "vila-da-barovia",
+      "status": "active"
+    },
+    "new_quest_gertruda": {
+      "journeyKey": "barovia",
+      "title": "Investigar o desaparecimento de Gertruda",
+      "desc": "Maria Louca revelou o sumiço da filha, Gertruda. Uma boneca traz referência a Blinsky, uma pista a seguir.",
+      "giver": "Maria Louca",
+      "locationType": "city",
+      "locationId": "vila-da-barovia",
+      "status": "active"
+    },
+    "new_quest_doru": {
+      "journeyKey": "barovia",
+      "title": "Resolver a situação de Doru",
+      "desc": "Doru, filho de Donavich, está transformado e preso no porão da igreja. Declarou servir a Strahd. O grupo decidiu não intervir por ora.",
+      "giver": "Padre Donavich",
+      "locationType": "city",
+      "locationId": "vila-da-barovia",
+      "status": "active"
+    },
+    "new_quest_encontro_lago_tser": {
+      "journeyKey": "barovia",
+      "title": "Encontro com a Vistani no Lago Tser",
+      "desc": "Uma mulher Vistani sugeriu a Fael um encontro caso ele vá ao acampamento Vistani do Lago Tser.",
+      "giver": "",
+      "locationType": "city",
+      "locationId": "acampamento-vistani-lago-tser",
+      "status": "active"
+    },
+    "new_quest_bau_trancado": {
+      "journeyKey": "barovia",
+      "title": "Abrir o baú trancado das catacumbas",
+      "desc": "Yoca não conseguiu abrir um baú trancado nos cômodos dos cultistas; ficou para trás sem ser recuperado (S05).",
+      "giver": "",
+      "locationType": "city",
+      "locationId": "vila-da-barovia",
+      "status": "active"
+    },
+    "new_quest_pistas_morgantha": {
+      "journeyKey": "barovia",
+      "title": "Investigar as pistas de Morgantha",
+      "desc": "Seguir as pistas dadas por Morgantha: os Vistani espiões de Strahd, o acampamento do Lago Tser, a Ordem do Dragão Prateado em Argynvostholt e o conhecimento proibido pela Passagem Tsolenka.",
+      "giver": "Morgantha",
+      "locationType": "",
+      "locationId": "",
+      "status": "active"
+    }
+  }
+}

@@ -1389,6 +1389,40 @@ body {
     flex-shrink: 0;
 }
 
+/* Badge indicando o mapa da parada (mapa principal x mapas internos de cidade) */
+.journey-stop-item .stop-map-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 6px;
+    font-size: 10px;
+    line-height: 1.4;
+    color: #b99a4e;
+    background: rgba(212, 168, 67, 0.12);
+    border: 1px solid rgba(212, 168, 67, 0.35);
+    border-radius: 8px;
+    vertical-align: middle;
+}
+
+.journey-stop-item .stop-map-badge.other-map {
+    color: #9a8f7a;
+    background: rgba(150, 150, 150, 0.1);
+    border-color: rgba(150, 150, 150, 0.3);
+}
+
+/* Paradas que pertencem a outro mapa aparecem levemente esmaecidas */
+.journey-stop-item.stop-other-map {
+    opacity: 0.6;
+}
+
+/* Dica sobre paradas em mapas internos no editor de jornadas */
+.journey-map-hint {
+    margin: 4px 0 10px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #9a8f7a;
+    font-style: italic;
+}
+
 .journey-stop-item .stop-edit-btn,
 .journey-stop-item .stop-delete-btn,
 .journey-stop-item .stop-move-btn {

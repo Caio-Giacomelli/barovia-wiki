@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Importar Wiki de Barovia para o Firestore</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 820px; margin: 40px auto; padding: 0 20px; background:#1b1416; color:#eee; }
+    h1 { color:#c44; }
+    button { background:#c44; color:#fff; border:0; padding:12px 20px; font-size:15px; border-radius:6px; cursor:pointer; }
+    button:disabled { opacity:.5; cursor:default; }
+    #log { background:#000; color:#7f7; padding:14px; border-radius:6px; margin-top:20px; white-space:pre-wrap; font-family:monospace; font-size:13px; max-height:480px; overflow:auto; }
+    .warn { color:#fc6; }
+    .err { color:#f66; }
+    label { display:block; margin:14px 0; }
+    code { background:#332; padding:2px 5px; border-radius:3px; }
+  </style>
+</head>
+<body>
+  <h1>Importar Wiki de Barovia</h1>
+  <p>Este utilitário lê <code>firestore-import.json</code> e grava os documentos no seu Firestore,
+  usando a mesma configuração do site (<code>../js/firebase-config.js</code>).</p>
+
+  <p class="warn">Antes de importar: revise <code>firestore-import.json</code> e este site precisa ser
+  aberto por um servidor local (ex.: <code>python -m http.server</code>) para conseguir carregar o JSON via fetch.</p>
+
+  <label><input type="checkbox" id="opt-sessions" checked> Sessões (<code>wikiSessionsFS</code>)</label>
+  <label><input type="checkbox" id="opt-collections" checked> Personagens históricos, aliados, vilões, artefatos, livros, marcos</label>
+  <label><input type="checkbox" id="opt-cities" checked> Locais (<code>cities</code>, merge)</label>
+  <label><input type="checkbox" id="opt-pois"> POIs sugeridos (<code>customPOIs</code>) — revise coordenadas antes!</label>
+  <label><input type="checkbox" id="opt-quests" checked> Demandas (<code>quests</code>)</label>
+
+  <p>
+    <button id="dry" type="button">Simular (dry-run, não grava)</button>
+    <button id="run" type="button">Importar de verdade</button>
+  </p>
+  <div id="log">Aguardando…</div>
+
+  <!-- Firebase (mesmas versões usadas pelo site; ajuste se o index.html usar outras) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="../js/firebase-config.js"></script>
+  <script>
+    const logEl = document.getElementById('log');
+    function log(msg, cls) { logEl.innerHTML += '\n' + (cls ? '<span class="'+cls+'">'+msg+'</span>' : msg); logEl.scrollTop = logEl.scrollHeight; }
+
+    // Colecoes tipo array. Removemos chaves auxiliares (_comentario) antes de gravar.
+    const ARRAY_COLLECTIONS = ['historicalNPCs','allies','villains','artifacts','books','landmarks'];
+
+    async function importData(dryRun) {
+      logEl.textContent = (dryRun ? 'DRY-RUN (nada será gravado)\n' : 'IMPORTANDO…\n');
+      let data;
+      try {
+        const res = await fetch('firestore-import.json');
+        data = await res.json();
+      } catch (e) {
+        log('Erro ao carregar firestore-import.json: ' + e.message + '\nAbra esta página por um servidor local.', 'err');
+        return;
+      }
+
+      const doSessions = document.getElementById('opt-sessions').checked;
+      const doColls = document.getElementById('opt-collections').checked;
+      const doCities = document.getElementById('opt-cities').checked;
+      const doPois = document.getElementById('opt-pois').checked;
+      const doQuests = document.getElementById('opt-quests').checked;
+
+      let count = 0;
+      async function writeDoc(collection, id, payload) {
+        // Nunca gravar chaves auxiliares
+        if (id.startsWith('_')) return;
+        const clean = {};
+        Object.keys(payload).forEach(k => { if (!k.startsWith('_')) clean[k] = payload[k]; });
+        count++;
+        if (dryRun) { log('· ' + collection + '/' + id); return; }
+        await db.collection(collection).doc(id).set(clean, { merge: true });
+        log('✓ ' + collection + '/' + id);
+      }
+
+      try {
+        if (doSessions && data.wikiSessionsFS) {
+          log('\n== wikiSessionsFS ==');
+          for (const id of Object.keys(data.wikiSessionsFS)) await writeDoc('wikiSessionsFS', id, data.wikiSessionsFS[id]);
+        }
+        if (doColls) {
+          for (const coll of ARRAY_COLLECTIONS) {
+            if (!data[coll]) continue;
+            log('\n== ' + coll + ' ==');
+            for (const id of Object.keys(data[coll])) await writeDoc(coll, id, data[coll][id]);
+          }
+        }
+        if (doCities && data.cities) {
+          log('\n== cities (merge) ==');
+          for (const id of Object.keys(data.cities)) await writeDoc('cities', id, data.cities[id]);
+        }
+        if (doPois && data.customPOIs) {
+          log('\n== customPOIs ==');
+          for (const id of Object.keys(data.customPOIs)) await writeDoc('customPOIs', id, data.customPOIs[id]);
+        }
+        if (doQuests && data.quests) {
+          log('\n== quests ==');
+          for (const id of Object.keys(data.quests)) await writeDoc('quests', id, data.quests[id]);
+        }
+        log('\n' + (dryRun ? 'Simulação concluída. ' : 'Importação concluída. ') + count + ' documento(s).', 'warn');
+      } catch (e) {
+        log('\nERRO: ' + e.message, 'err');
+      }
+    }
+
+    document.getElementById('dry').addEventListener('click', () => importData(true));
+    document.getElementById('run').addEventListener('click', () => {
+      if (confirm('Isso vai gravar documentos no Firestore (merge). Continuar?')) importData(false);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+{
+  "_meta": {
+    "descricao": "Adições sugeridas para as páginas dos PERSONAGENS DOS JOGADORES, que já existem no Firestore (colecao 'characters', com IDs de índice numérico). NÃO sei os índices atuais desses documentos, por isso estas entradas estão indexadas por NOME para revisão. Depois de revisar, mescle cada bloco 'details' na página do personagem correspondente (merge no array 'details').",
+    "comoUsar": "1) Reveja os itens. 2) Para cada personagem, adicione os 'details' desejados à página existente (pelo editor da wiki ou via db.collection('characters').doc(<indice>).set({ details: [...atuais, ...novos] }, { merge: true })). 3) Se quiser, use o campo 'descricaoSugerida' como resumo do papel do PC na campanha.",
+    "sessoesCobertas": "S01 a S10"
+  },
+
+  "Britta": {
+    "player": "",
+    "descricaoSugerida": "Aventureira que se juntou ao grupo em Thalas'dar e entrou em Barovia atrás do pedido de auxílio do burgomestre.",
+    "detailsSugeridos": [
+      "Recolheu a bolsa de pele humana com 11 moedas de ouro e 60 de prata nos cômodos dos cultistas (S05).",
+      "Ajudou a levar os ossos de Rosa e Cravo para fora da Casa da Morte; entrou nas Brumas durante o sepultamento e sofreu forte exaustão (S04).",
+      "Recolheu a camisa de malha do baú dos líderes cultistas e recebeu uma poção de cura (S06).",
+      "Investigou a cozinha e a despensa da Casa da Morte com Seraphin (S03).",
+      "Permaneceu na Mansão do Burgomestre com Ismark e Irene enquanto o grupo ia à igreja (S09)."
+    ]
+  },
+
+  "Fael'ric Elwarin": {
+    "player": "",
+    "descricaoSugerida": "Irmão de Leena, residente de Thalas'dar. Conjurador do grupo, usou magias como Mãos Mágicas e Mensagem em momentos-chave.",
+    "detailsSugeridos": [
+      "Encontrou capas pretas e uma cartola no armário próximo ao Hall Principal e levou as roupas (S03).",
+      "Foi atacado pela Animated Armor no terceiro andar e pela Broom of Animated Attack durante a busca pelo bebê (S03).",
+      "Usou Mãos Mágicas para cavar e enterrar os ossos de Rosa e Cravo sem expor ninguém às Brumas (S04).",
+      "Encontrou a pulseira no corpo do ghast associado a Gustavo Durst e recebeu uma poção de cura (S06).",
+      "Recolheu um anel de ouro junto a um esqueleto nas celas das catacumbas (S07).",
+      "Usou Mensagem para perguntar a Doru a quem ele servia; recebeu como resposta que ele servia a Strahd (S09).",
+      "Flertou com uma mulher Vistani na taverna, que sugeriu um encontro no acampamento do Lago Tser (S09)."
+    ]
+  },
+
+  "Leena Elwarin": {
+    "player": "",
+    "descricaoSugerida": "Irmã de Fael, residente de Thalas'dar. Antes da reunião do grupo, havia se separado de Sir Charles, com quem viajava.",
+    "detailsSugeridos": [
+      "Ficou do lado de fora da Casa da Morte com as crianças no início da exploração e entrou correndo ao ouvir sobre um bebê no terceiro andar (S03).",
+      "Recolheu a caixa de prata com filigrana de ouro no quarto principal (S03).",
+      "Ajudou a levar os ossos de Rosa e Cravo para fora para o sepultamento (S04).",
+      "Recolheu a escova de cabelo de marfim com cerdas de prata nos cômodos dos cultistas (S05).",
+      "Recebeu uma poção de cura do baú dos líderes cultistas (S06)."
+    ]
+  },
+
+  "Njoldvar": {
+    "player": "",
+    "descricaoSugerida": "Membro do grupo que entrou em Barovia; ficou com vários itens de fé e utilidade recolhidos na jornada.",
+    "detailsSugeridos": [
+      "Conteve Yoca (possuído por Rosa) antes que ele descesse sozinho ao subterrâneo da Casa da Morte (S04).",
+      "Ficou com os três pergaminhos do quarto secreto: Bênção, Proteção contra Veneno e Arma Espiritual (S04).",
+      "Ficou com o jarro de vinho obtido na Taverna Sangue da Vinha (S08).",
+      "Ficou com o livro de Divindades e Ritos Sagrados (S10)."
+    ]
+  },
+
+  "Seraphin Alvorada": {
+    "player": "",
+    "descricaoSugerida": "Conjurador do grupo. Ajudou uma criança em um beco em Thalas'dar antes de partir. Adotou um foco arcano encontrado nas catacumbas.",
+    "detailsSugeridos": [
+      "Ajudou uma criança em um beco de Thalas'dar antes da reunião do grupo (S01).",
+      "Investigou a cozinha e a despensa da Casa da Morte com Britta (S03).",
+      "Foi atrás de Yoca com Njoldvar quando ele avançou para o subterrâneo (S04).",
+      "Retirou o orbe de cristal cinza esfumaçado da estátua do santuário e passou a usá-lo como foco arcano (S06).",
+      "Recolheu o Manto de Proteção do baú dos líderes cultistas (S06).",
+      "Obteve o livro Hinos da Alvorada durante a visita à igreja (S10)."
+    ]
+  },
+
+  "Yoca Melligiaco": {
+    "player": "",
+    "descricaoSugerida": "Chegou a Thalas'dar numa carroça acompanhado do senhor Bing. Curioso e impulsivo, foi possuído pelo espírito de Rosa na Casa da Morte.",
+    "detailsSugeridos": [
+      "Chegou a Thalas'dar numa carroça com o senhor Bing (S01).",
+      "Percebeu o odor que levou o grupo a achar o cadáver com a segunda carta na Floresta Svalich (S02).",
+      "Acendeu todas as lareiras da Casa da Morte, suspeitando de um enigma; isso teve impacto na fuga da casa (S03, S08).",
+      "Foi possuído por Rosa, passou a agir de forma infantil e avançou para o subterrâneo antes de ser contido (S04).",
+      "Recolheu o colar de platina com pingente de topázio (S03), as ágatas de musgo, o pano preto e o tapa-olho com cornalina (S05), e o frasco de fogo alquímico (S06).",
+      "Não conseguiu abrir um baú trancado nas catacumbas e o deixou para trás (S05); caiu numa armadilha do subterrâneo (S05).",
+      "Recebeu uma poção de cura do baú dos líderes cultistas (S06).",
+      "Tentou acompanhar a Marcha dos Mortos por cerca de meia hora, mas desistiu ao ver que seguiam fundo na floresta (S09)."
+    ]
+  }
+}
